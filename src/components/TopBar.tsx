@@ -61,11 +61,11 @@ export default function TopBar() {
   }
 
   return (
-    <header className="h-12 shrink-0 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border)] bg-[var(--surface)]">
+    <header className="h-12 shrink-0 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border)] bg-[var(--surface)] overflow-hidden">
       {/* Left: Brand + Template */}
-      <div className="flex items-center gap-2 md:gap-3">
-        <div className="flex items-center gap-1.5">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <div className="flex items-center gap-2 md:gap-3 min-w-0">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <svg className="hidden md:block" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
             <line x1="16" y1="13" x2="8" y2="13"/>
@@ -76,12 +76,12 @@ export default function TopBar() {
           <span className="hidden md:inline text-[10px] text-[var(--text-3)] font-mono">Resume</span>
         </div>
         <span className="text-[var(--border-strong)]">|</span>
-        <div className="flex gap-0.5">
+        <div className="flex gap-0.5 shrink-0">
           {TEMPLATES.map((t) => (
             <button
               key={t.id}
               onClick={() => setTemplate(t.id)}
-              className={`px-2 md:px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+              className={`px-1.5 md:px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
                 template === t.id
                   ? 'bg-[var(--accent)] text-white'
                   : 'text-[var(--text-2)] hover:bg-[var(--bg)]'
@@ -118,7 +118,7 @@ export default function TopBar() {
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0 ml-2">
         <input ref={fileRef} type="file" accept=".docx,.doc" className="hidden" onChange={handleImport} />
         <button
           onClick={() => fileRef.current?.click()}
@@ -134,9 +134,10 @@ export default function TopBar() {
         </button>
         <button
           onClick={handleExportPdf}
-          className="px-3 py-1.5 rounded text-[11px] font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors"
+          className="px-2.5 md:px-3 py-1.5 rounded text-[11px] font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors"
         >
-          导出 PDF
+          <span className="md:hidden">PDF</span>
+          <span className="hidden md:inline">导出 PDF</span>
         </button>
       </div>
     </header>

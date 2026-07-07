@@ -24,6 +24,9 @@ body {
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+@media (max-width: 767px) {
+  ::-webkit-scrollbar { display: none; }
+}
 
 input, textarea, select {
   font-family: inherit;

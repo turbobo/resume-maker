@@ -17,7 +17,9 @@ export default function PreviewPanel() {
     const el = containerRef.current
     if (!el) return
     const ro = new ResizeObserver(() => {
-      const available = el.clientWidth - 32
+      const w = el.clientWidth
+      if (w === 0) return
+      const available = w - 32
       setPageZoom(available < A4_WIDTH_PX ? available / A4_WIDTH_PX : 1)
     })
     ro.observe(el)
