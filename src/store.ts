@@ -3,9 +3,13 @@ import { persist } from 'zustand/middleware'
 import type { ResumeData, TemplateId, Experience, Education, Project, SectionId } from './types'
 import { DEFAULT_RESUME, uid } from './types'
 
+export type EditFocus = { section: SectionId; itemId?: string } | null
+
 interface Store {
   data: ResumeData
   template: TemplateId
+  editFocus: EditFocus
+  setEditFocus: (focus: EditFocus) => void
   setTemplate: (t: TemplateId) => void
   update: (partial: Partial<ResumeData>) => void
   // Sections
@@ -36,6 +40,8 @@ export const useStore = create<Store>()(
     (set) => ({
   data: DEFAULT_RESUME,
   template: 'classic',
+  editFocus: null,
+  setEditFocus: (focus) => set({ editFocus: focus }),
   setTemplate: (t) => set({ template: t }),
 
   update: (partial) => set((s) => ({ data: { ...s.data, ...partial } })),

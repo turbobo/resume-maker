@@ -26,9 +26,10 @@ export interface Project {
   description: string
 }
 
-export type SectionId = 'summary' | 'experience' | 'projects' | 'education' | 'skills'
+export type SectionId = 'basic' | 'summary' | 'experience' | 'projects' | 'education' | 'skills'
 
 export const SECTION_LABELS: Record<SectionId, string> = {
+  basic: '基本信息',
   summary: '个人简介',
   experience: '工作经历',
   projects: '项目经历',
