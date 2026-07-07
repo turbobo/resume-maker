@@ -24,6 +24,9 @@ interface Store {
   addProject: () => void
   updateProject: (id: string, partial: Partial<Project>) => void
   removeProject: (id: string) => void
+  reorderExperiences: (experiences: Experience[]) => void
+  reorderEducation: (education: Education[]) => void
+  reorderProjects: (projects: Project[]) => void
   // Import
   importData: (data: Partial<ResumeData>) => void
 }
@@ -102,6 +105,13 @@ export const useStore = create<Store>()(
     set((s) => ({
       data: { ...s.data, projects: s.data.projects.filter((p) => p.id !== id) },
     })),
+
+  reorderExperiences: (experiences) =>
+    set((s) => ({ data: { ...s.data, experiences } })),
+  reorderEducation: (education) =>
+    set((s) => ({ data: { ...s.data, education } })),
+  reorderProjects: (projects) =>
+    set((s) => ({ data: { ...s.data, projects } })),
 
   importData: (incoming) =>
     set((s) => ({ data: { ...s.data, ...incoming } })),

@@ -3,6 +3,57 @@ import { useStore } from '../store'
 import type { Experience, Education, Project } from '../types'
 import { SECTION_LABELS } from '../types'
 
+// ─── Generic drag-to-reorder hook ───
+
+function useDragSort<T extends { id: string }>(
+  items: T[],
+  reorder: (newItems: T[]) => void
+) {
+  const [dragging, setDragging] = useState<number | null>(null)
+  const [dropTarget, setDropTarget] = useState<number | null>(null)
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const stateRef = useRef({ items, fromIdx: null as number | null })
+  stateRef.current.items = items
+
+  const getDropIndex = useCallback((clientY: number) => {
+    let best = 0, bestDist = Infinity
+    itemRefs.current.forEach((el, i) => {
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const dist = Math.abs(clientY - (rect.top + rect.height / 2))
+      if (dist < bestDist) { bestDist = dist; best = i }
+    })
+    return best
+  }, [])
+
+  const startDrag = useCallback((e: React.PointerEvent, idx: number) => {
+    e.preventDefault()
+    stateRef.current.fromIdx = idx
+    setDragging(idx)
+
+    const onMove = (ev: PointerEvent) => setDropTarget(getDropIndex(ev.clientY))
+    const onUp = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      const from = stateRef.current.fromIdx
+      const to = getDropIndex(ev.clientY)
+      stateRef.current.fromIdx = null
+      setDragging(null)
+      setDropTarget(null)
+      if (from !== null && from !== to) {
+        const next = [...stateRef.current.items]
+        const [moved] = next.splice(from, 1)
+        next.splice(to, 0, moved)
+        reorder(next)
+      }
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }, [getDropIndex, reorder])
+
+  return { dragging, dropTarget, itemRefs, startDrag }
+}
+
 // ─── Helper components ───
 
 const Input = memo(function Input({ label, value, onChange, placeholder, type = 'text' }: {
@@ -50,9 +101,26 @@ function SectionHeader({ title, onAdd }: { title: string; onAdd: () => void }) {
   )
 }
 
-function ItemCard({ children, onRemove }: { children: React.ReactNode; onRemove: () => void }) {
+const GripIcon = () => (
+  <svg aria-hidden="true" className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+    <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+    <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+  </svg>
+)
+
+function ItemCard({ children, onRemove, dragHandle, isDragging, isDropTarget }: {
+  children: React.ReactNode
+  onRemove: () => void
+  dragHandle?: (e: React.PointerEvent) => void
+  isDragging?: boolean
+  isDropTarget?: boolean
+}) {
   return (
-    <div className="relative p-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] mb-2 group">
+    <div className={`relative p-3 rounded-lg border bg-[var(--surface)] mb-2 group transition-all select-none
+      ${isDragging ? 'opacity-40 scale-[0.98] border-[var(--border)]' :
+        isDropTarget ? 'border-[var(--accent)] shadow-sm' : 'border-[var(--border)]'}`}
+    >
       <button
         onClick={onRemove}
         aria-label="删除此项"
@@ -60,20 +128,37 @@ function ItemCard({ children, onRemove }: { children: React.ReactNode; onRemove:
       >
         ✕
       </button>
-      {children}
+      <div className="flex items-start gap-2">
+        {dragHandle && (
+          <div
+            onPointerDown={dragHandle}
+            style={{ touchAction: 'none' }}
+            aria-label="拖拽排序"
+            className="mt-1 shrink-0 cursor-grab active:cursor-grabbing p-0.5 text-[var(--text-3)] md:opacity-0 md:group-hover:opacity-100 hover:text-[var(--text-2)] transition-all"
+          >
+            <GripIcon />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          {children}
+        </div>
+      </div>
     </div>
   )
 }
 
-const ExperienceCard = memo(function ExperienceCard({ item }: {
+const ExperienceCard = memo(function ExperienceCard({ item, dragHandle, isDragging, isDropTarget }: {
   item: Experience
+  dragHandle?: (e: React.PointerEvent) => void
+  isDragging?: boolean
+  isDropTarget?: boolean
 }) {
   const updateExperience = useStore((s) => s.updateExperience)
   const removeExperience = useStore((s) => s.removeExperience)
   const onRemove = useCallback(() => removeExperience(item.id), [removeExperience, item.id])
 
   return (
-    <ItemCard onRemove={onRemove}>
+    <ItemCard onRemove={onRemove} dragHandle={dragHandle} isDragging={isDragging} isDropTarget={isDropTarget}>
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">
           <Input label="公司" value={item.company} onChange={(v) => updateExperience(item.id, { company: v })} placeholder="公司名称" />
@@ -89,15 +174,18 @@ const ExperienceCard = memo(function ExperienceCard({ item }: {
   )
 })
 
-const EducationCard = memo(function EducationCard({ item }: {
+const EducationCard = memo(function EducationCard({ item, dragHandle, isDragging, isDropTarget }: {
   item: Education
+  dragHandle?: (e: React.PointerEvent) => void
+  isDragging?: boolean
+  isDropTarget?: boolean
 }) {
   const updateEducation = useStore((s) => s.updateEducation)
   const removeEducation = useStore((s) => s.removeEducation)
   const onRemove = useCallback(() => removeEducation(item.id), [removeEducation, item.id])
 
   return (
-    <ItemCard onRemove={onRemove}>
+    <ItemCard onRemove={onRemove} dragHandle={dragHandle} isDragging={isDragging} isDropTarget={isDropTarget}>
       <div className="space-y-2">
         <Input label="学校" value={item.school} onChange={(v) => updateEducation(item.id, { school: v })} placeholder="学校名称" />
         <div className="grid grid-cols-2 gap-2">
@@ -113,15 +201,18 @@ const EducationCard = memo(function EducationCard({ item }: {
   )
 })
 
-const ProjectCard = memo(function ProjectCard({ item }: {
+const ProjectCard = memo(function ProjectCard({ item, dragHandle, isDragging, isDropTarget }: {
   item: Project
+  dragHandle?: (e: React.PointerEvent) => void
+  isDragging?: boolean
+  isDropTarget?: boolean
 }) {
   const updateProject = useStore((s) => s.updateProject)
   const removeProject = useStore((s) => s.removeProject)
   const onRemove = useCallback(() => removeProject(item.id), [removeProject, item.id])
 
   return (
-    <ItemCard onRemove={onRemove}>
+    <ItemCard onRemove={onRemove} dragHandle={dragHandle} isDragging={isDragging} isDropTarget={isDropTarget}>
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">
           <Input label="项目名" value={item.name} onChange={(v) => updateProject(item.id, { name: v })} placeholder="项目名称" />
@@ -315,12 +406,21 @@ function SkillsEditorSection() {
 function ExperiencesSection() {
   const experiences = useStore((s) => s.data.experiences)
   const addExperience = useStore((s) => s.addExperience)
+  const reorderExperiences = useStore((s) => s.reorderExperiences)
+  const { dragging, dropTarget, itemRefs, startDrag } = useDragSort(experiences, reorderExperiences)
 
   return (
     <section>
       <SectionHeader title="工作经历" onAdd={addExperience} />
-      {experiences.map((exp) => (
-        <ExperienceCard key={exp.id} item={exp} />
+      {experiences.map((exp, idx) => (
+        <div key={exp.id} ref={(el) => { itemRefs.current[idx] = el }}>
+          <ExperienceCard
+            item={exp}
+            dragHandle={(e) => startDrag(e, idx)}
+            isDragging={dragging === idx}
+            isDropTarget={dropTarget === idx && dragging !== null}
+          />
+        </div>
       ))}
     </section>
   )
@@ -329,12 +429,21 @@ function ExperiencesSection() {
 function EducationEditorSection() {
   const education = useStore((s) => s.data.education)
   const addEducation = useStore((s) => s.addEducation)
+  const reorderEducation = useStore((s) => s.reorderEducation)
+  const { dragging, dropTarget, itemRefs, startDrag } = useDragSort(education, reorderEducation)
 
   return (
     <section>
       <SectionHeader title="教育背景" onAdd={addEducation} />
-      {education.map((edu) => (
-        <EducationCard key={edu.id} item={edu} />
+      {education.map((edu, idx) => (
+        <div key={edu.id} ref={(el) => { itemRefs.current[idx] = el }}>
+          <EducationCard
+            item={edu}
+            dragHandle={(e) => startDrag(e, idx)}
+            isDragging={dragging === idx}
+            isDropTarget={dropTarget === idx && dragging !== null}
+          />
+        </div>
       ))}
     </section>
   )
@@ -343,12 +452,21 @@ function EducationEditorSection() {
 function ProjectsSection() {
   const projects = useStore((s) => s.data.projects)
   const addProject = useStore((s) => s.addProject)
+  const reorderProjects = useStore((s) => s.reorderProjects)
+  const { dragging, dropTarget, itemRefs, startDrag } = useDragSort(projects, reorderProjects)
 
   return (
     <section>
       <SectionHeader title="项目经历" onAdd={addProject} />
-      {projects.map((proj) => (
-        <ProjectCard key={proj.id} item={proj} />
+      {projects.map((proj, idx) => (
+        <div key={proj.id} ref={(el) => { itemRefs.current[idx] = el }}>
+          <ProjectCard
+            item={proj}
+            dragHandle={(e) => startDrag(e, idx)}
+            isDragging={dragging === idx}
+            isDropTarget={dropTarget === idx && dragging !== null}
+          />
+        </div>
       ))}
     </section>
   )
