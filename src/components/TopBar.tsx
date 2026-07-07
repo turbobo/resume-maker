@@ -61,9 +61,9 @@ export default function TopBar() {
   }
 
   return (
-    <header className="h-12 shrink-0 flex items-center justify-between px-4 border-b border-[var(--border)] bg-[var(--surface)]">
+    <header className="h-12 shrink-0 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border)] bg-[var(--surface)]">
       {/* Left: Brand + Template */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         <div className="flex items-center gap-1.5">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -73,7 +73,7 @@ export default function TopBar() {
             <polyline points="10 9 9 9 8 9"/>
           </svg>
           <span className="text-sm font-semibold tracking-tight">简履</span>
-          <span className="text-[10px] text-[var(--text-3)] font-mono">Resume</span>
+          <span className="hidden md:inline text-[10px] text-[var(--text-3)] font-mono">Resume</span>
         </div>
         <span className="text-[var(--border-strong)]">|</span>
         <div className="flex gap-0.5">
@@ -81,7 +81,7 @@ export default function TopBar() {
             <button
               key={t.id}
               onClick={() => setTemplate(t.id)}
-              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+              className={`px-2 md:px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
                 template === t.id
                   ? 'bg-[var(--accent)] text-white'
                   : 'text-[var(--text-2)] hover:bg-[var(--bg)]'
@@ -91,9 +91,9 @@ export default function TopBar() {
             </button>
           ))}
         </div>
-        <span className="text-[var(--border-strong)]">|</span>
-        {/* Font selectors */}
-        <div className="flex items-center gap-1.5">
+        {/* Font selectors — desktop only */}
+        <span className="hidden md:inline text-[var(--border-strong)]">|</span>
+        <div className="hidden md:flex items-center gap-1.5">
           <label className="text-[10px] text-[var(--text-3)]">标题</label>
           <select
             value={headingFont}
@@ -122,13 +122,13 @@ export default function TopBar() {
         <input ref={fileRef} type="file" accept=".docx,.doc" className="hidden" onChange={handleImport} />
         <button
           onClick={() => fileRef.current?.click()}
-          className="px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors"
+          className="hidden md:inline-flex px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors"
         >
           导入 Word
         </button>
         <button
           onClick={handleExportDocx}
-          className="px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors"
+          className="hidden md:inline-flex px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors"
         >
           导出 Word
         </button>

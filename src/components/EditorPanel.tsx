@@ -319,7 +319,7 @@ function ProjectsSection() {
 
 export default function EditorPanel() {
   return (
-    <aside className="w-[360px] shrink-0 border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-4 space-y-5">
+    <aside className="w-full md:w-[360px] shrink-0 border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-4 space-y-5">
       <SectionOrder />
       <BasicInfoSection />
       <SummarySection />

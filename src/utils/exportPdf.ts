@@ -5,6 +5,12 @@ export async function exportPdf() {
     return
   }
 
+  const savedZoom = element.style.zoom
+  if (savedZoom && savedZoom !== '1') {
+    element.style.zoom = '1'
+    await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+  }
+
   const nameEl = element.querySelector('h1')
   const name = nameEl?.textContent?.trim() || '简历'
 
@@ -19,6 +25,10 @@ export async function exportPdf() {
     logging: false,
     backgroundColor: '#ffffff',
   })
+
+  if (savedZoom && savedZoom !== '1') {
+    element.style.zoom = savedZoom
+  }
 
   const imgData = canvas.toDataURL('image/png')
   const pdf = new jsPDF({
