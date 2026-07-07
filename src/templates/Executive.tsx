@@ -102,7 +102,7 @@ export default function ExecutiveTemplate({ data }: { data: ResumeData }) {
           {data.summary && (
             <div className="mb-2.5">
               <h2 style={{ fontFamily: headingFont }} className="text-[9.5pt] font-bold mb-1 pb-1 border-b border-[#e7e5e4]">个人简介</h2>
-              <p className="text-[8.5pt] text-[#57534e] leading-[1.5]">{data.summary}</p>
+              <p className="text-[8.5pt] text-[#57534e] leading-[1.5] whitespace-pre-line">{data.summary}</p>
             </div>
           )}
         </SectionHighlight>

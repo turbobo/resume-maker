@@ -53,7 +53,7 @@ export function SummarySection({ data, headingFamily, variant = 'default' }: Sec
     <SectionHighlight sectionId="summary">
       <section className="mb-2.5">
         {variant !== 'plain' && <SectionTitle headingFamily={headingFamily}>{SECTION_LABELS.summary}</SectionTitle>}
-        <p className="text-[8.5pt] text-[#57534e] leading-[1.55]">{data.summary}</p>
+        <p className="text-[8.5pt] text-[#57534e] leading-[1.55] whitespace-pre-line">{data.summary}</p>
       </section>
     </SectionHighlight>
   )
@@ -76,7 +76,7 @@ export function ExperienceSection({ data, headingFamily, variant = 'line' }: Sec
                 <span className="text-[8pt] text-[#a8a29e] shrink-0">{exp.startDate} — {exp.endDate}</span>
               </div>
               {exp.description && (
-                <p className="text-[8.5pt] text-[#57534e] leading-[1.5]">{exp.description}</p>
+                <p className="text-[8.5pt] text-[#57534e] leading-[1.5] whitespace-pre-line">{exp.description}</p>
               )}
             </div>
           </SectionHighlight>
@@ -103,7 +103,7 @@ export function ProjectSection({ data, headingFamily, variant = 'line' }: Sectio
                 <span className="text-[8pt] text-[#a8a29e] shrink-0">{proj.startDate} — {proj.endDate}</span>
               </div>
               {proj.description && (
-                <p className="text-[8.5pt] text-[#57534e] leading-[1.5]">{proj.description}</p>
+                <p className="text-[8.5pt] text-[#57534e] leading-[1.5] whitespace-pre-line">{proj.description}</p>
               )}
             </div>
           </SectionHighlight>

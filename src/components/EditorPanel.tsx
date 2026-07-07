@@ -113,12 +113,62 @@ const DateInput = memo(function DateInput({ label, value, onChange, placeholder,
   )
 })
 
+function TextEditModal({ label, value, onChange, onClose, onFocus, onBlur }: {
+  label: string; value: string; onChange: (v: string) => void; onClose: () => void; onFocus?: () => void; onBlur?: () => void
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null)
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40" />
+      <div
+        className="relative w-full md:max-w-[640px] bg-[var(--surface)] rounded-t-2xl md:rounded-xl shadow-2xl flex flex-col"
+        style={{ maxHeight: 'calc(100vh - 2rem)', height: 'calc(100vh - 4rem)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[var(--border)] shrink-0">
+          <h3 className="text-[15px] md:text-[14px] font-semibold text-[var(--text)]">{label}</h3>
+          <button
+            onClick={onClose}
+            aria-label="关闭"
+            className="w-8 h-8 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] transition-colors"
+          >
+            <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <textarea
+          ref={ref}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          autoFocus
+          className="flex-1 p-4 md:p-5 text-[16px] md:text-[14px] leading-[1.7] bg-transparent outline-none resize-none"
+        />
+      </div>
+    </div>
+  )
+}
+
 const TextArea = memo(function TextArea({ label, value, onChange, placeholder, rows = 3, onFocus, onBlur }: {
   label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number; onFocus?: () => void; onBlur?: () => void
 }) {
+  const [expanded, setExpanded] = useState(false)
+
   return (
-    <label className="block">
-      <span className="text-[13px] md:text-[11px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
+    <div className="block">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[13px] md:text-[11px] font-medium text-[var(--text-2)]">{label}</span>
+        <button
+          onClick={() => setExpanded(true)}
+          aria-label="展开编辑"
+          className="p-1 rounded text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--bg)] transition-colors"
+        >
+          <svg aria-hidden="true" className="w-3.5 h-3.5 md:w-3 md:h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+          </svg>
+        </button>
+      </div>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -128,7 +178,17 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
         rows={rows}
         className="w-full px-3 md:px-2.5 py-2 md:py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[13px] resize-none transition-colors"
       />
-    </label>
+      {expanded && (
+        <TextEditModal
+          label={label}
+          value={value}
+          onChange={onChange}
+          onClose={() => setExpanded(false)}
+          onFocus={onFocus}
+          onBlur={onBlur}
+        />
+      )}
+    </div>
   )
 })
 

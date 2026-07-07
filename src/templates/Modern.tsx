@@ -76,7 +76,7 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
       <div className="flex-1 p-[12mm] space-y-3">
         <SectionHighlight sectionId="summary">
           {data.summary && (
-            <p className="text-[9pt] text-[#57534e] leading-[1.6]">{data.summary}</p>
+            <p className="text-[9pt] text-[#57534e] leading-[1.6] whitespace-pre-line">{data.summary}</p>
           )}
         </SectionHighlight>
         {data.sectionOrder.filter((id) => !SIDEBAR_SECTIONS.has(id) && id !== 'summary').map((id) => (
