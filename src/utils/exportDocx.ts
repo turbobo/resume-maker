@@ -44,65 +44,80 @@ export async function exportDocx(data: ResumeData) {
     }))
   }
 
-  if (data.experiences.length > 0) {
-    paragraphs.push(sectionHeader('工作经历'))
-    for (const exp of data.experiences) {
-      paragraphs.push(new Paragraph({
-        children: [
-          new TextRun({ text: exp.company, bold: true, size: 20, font: 'Arial' }),
-          new TextRun({ text: `  ${exp.title}`, size: 19, color: '57534e', font: 'Arial' }),
-          new TextRun({ text: `  ${exp.startDate} — ${exp.endDate}`, size: 16, color: 'a8a29e', font: 'Arial' }),
-        ],
-        spacing: { before: 80, after: 40 },
-      }))
-      if (exp.description) {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ text: exp.description, size: 18, color: '57534e', font: 'Arial' })],
-          spacing: { after: 80 },
-        }))
-      }
-    }
-  }
+  for (const sectionId of data.sectionOrder) {
+    switch (sectionId) {
+      case 'summary':
+        break
 
-  if (data.projects.length > 0) {
-    paragraphs.push(sectionHeader('项目经历'))
-    for (const proj of data.projects) {
-      paragraphs.push(new Paragraph({
-        children: [
-          new TextRun({ text: proj.name, bold: true, size: 20, font: 'Arial' }),
-          new TextRun({ text: `  ${proj.role}`, size: 19, color: '57534e', font: 'Arial' }),
-          new TextRun({ text: `  ${proj.startDate} — ${proj.endDate}`, size: 16, color: 'a8a29e', font: 'Arial' }),
-        ],
-        spacing: { before: 80, after: 40 },
-      }))
-      if (proj.description) {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun({ text: proj.description, size: 18, color: '57534e', font: 'Arial' })],
-          spacing: { after: 80 },
-        }))
-      }
-    }
-  }
+      case 'experience':
+        if (data.experiences.length > 0) {
+          paragraphs.push(sectionHeader('工作经历'))
+          for (const exp of data.experiences) {
+            paragraphs.push(new Paragraph({
+              children: [
+                new TextRun({ text: exp.company, bold: true, size: 20, font: 'Arial' }),
+                new TextRun({ text: `  ${exp.title}`, size: 19, color: '57534e', font: 'Arial' }),
+                new TextRun({ text: `  ${exp.startDate} — ${exp.endDate}`, size: 16, color: 'a8a29e', font: 'Arial' }),
+              ],
+              spacing: { before: 80, after: 40 },
+            }))
+            if (exp.description) {
+              paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: exp.description, size: 18, color: '57534e', font: 'Arial' })],
+                spacing: { after: 80 },
+              }))
+            }
+          }
+        }
+        break
 
-  if (data.education.length > 0) {
-    paragraphs.push(sectionHeader('教育背景'))
-    for (const edu of data.education) {
-      paragraphs.push(new Paragraph({
-        children: [
-          new TextRun({ text: edu.school, bold: true, size: 20, font: 'Arial' }),
-          new TextRun({ text: `  ${edu.degree} · ${edu.major}`, size: 19, color: '57534e', font: 'Arial' }),
-          new TextRun({ text: `  ${edu.startDate} — ${edu.endDate}`, size: 16, color: 'a8a29e', font: 'Arial' }),
-        ],
-        spacing: { before: 80, after: 80 },
-      }))
-    }
-  }
+      case 'projects':
+        if (data.projects.length > 0) {
+          paragraphs.push(sectionHeader('项目经历'))
+          for (const proj of data.projects) {
+            paragraphs.push(new Paragraph({
+              children: [
+                new TextRun({ text: proj.name, bold: true, size: 20, font: 'Arial' }),
+                new TextRun({ text: `  ${proj.role}`, size: 19, color: '57534e', font: 'Arial' }),
+                new TextRun({ text: `  ${proj.startDate} — ${proj.endDate}`, size: 16, color: 'a8a29e', font: 'Arial' }),
+              ],
+              spacing: { before: 80, after: 40 },
+            }))
+            if (proj.description) {
+              paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: proj.description, size: 18, color: '57534e', font: 'Arial' })],
+                spacing: { after: 80 },
+              }))
+            }
+          }
+        }
+        break
 
-  if (data.skills) {
-    paragraphs.push(sectionHeader('技能'))
-    paragraphs.push(new Paragraph({
-      children: [new TextRun({ text: data.skills, size: 18, color: '57534e', font: 'Arial' })],
-    }))
+      case 'education':
+        if (data.education.length > 0) {
+          paragraphs.push(sectionHeader('教育背景'))
+          for (const edu of data.education) {
+            paragraphs.push(new Paragraph({
+              children: [
+                new TextRun({ text: edu.school, bold: true, size: 20, font: 'Arial' }),
+                new TextRun({ text: `  ${edu.degree} · ${edu.major}`, size: 19, color: '57534e', font: 'Arial' }),
+                new TextRun({ text: `  ${edu.startDate} — ${edu.endDate}`, size: 16, color: 'a8a29e', font: 'Arial' }),
+              ],
+              spacing: { before: 80, after: 80 },
+            }))
+          }
+        }
+        break
+
+      case 'skills':
+        if (data.skills) {
+          paragraphs.push(sectionHeader('技能'))
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: data.skills, size: 18, color: '57534e', font: 'Arial' })],
+          }))
+        }
+        break
+    }
   }
 
   const doc = new Document({

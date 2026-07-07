@@ -12,15 +12,15 @@ const TEMPLATES: { id: TemplateId; label: string }[] = [
 export default function TopBar() {
   const template = useStore((s) => s.template)
   const setTemplate = useStore((s) => s.setTemplate)
-  const data = useStore((s) => s.data)
+  const headingFont = useStore((s) => s.data.headingFont)
+  const bodyFont = useStore((s) => s.data.bodyFont)
   const importData = useStore((s) => s.importData)
   const setHeadingFont = useStore((s) => s.setHeadingFont)
   const setBodyFont = useStore((s) => s.setBodyFont)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  // Load Google Fonts dynamically
   useEffect(() => {
-    const ids = new Set([data.headingFont, data.bodyFont])
+    const ids = new Set([headingFont, bodyFont])
     ids.forEach((id) => {
       const font = FONT_OPTIONS.find((f) => f.id === id)
       if (font?.import) {
@@ -34,7 +34,7 @@ export default function TopBar() {
         }
       }
     })
-  }, [data.headingFont, data.bodyFont])
+  }, [headingFont, bodyFont])
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -52,7 +52,7 @@ export default function TopBar() {
 
   const handleExportDocx = async () => {
     const { exportDocx } = await import('../utils/exportDocx')
-    exportDocx(data)
+    exportDocx(useStore.getState().data)
   }
 
   const handleExportPdf = async () => {
@@ -96,7 +96,7 @@ export default function TopBar() {
         <div className="flex items-center gap-1.5">
           <label className="text-[10px] text-[var(--text-3)]">标题</label>
           <select
-            value={data.headingFont}
+            value={headingFont}
             onChange={(e) => setHeadingFont(e.target.value)}
             className="px-1.5 py-1 rounded border border-[var(--border)] text-[11px] bg-[var(--surface)] cursor-pointer"
           >
@@ -106,7 +106,7 @@ export default function TopBar() {
           </select>
           <label className="text-[10px] text-[var(--text-3)]">正文</label>
           <select
-            value={data.bodyFont}
+            value={bodyFont}
             onChange={(e) => setBodyFont(e.target.value)}
             className="px-1.5 py-1 rounded border border-[var(--border)] text-[11px] bg-[var(--surface)] cursor-pointer"
           >

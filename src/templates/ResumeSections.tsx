@@ -34,11 +34,11 @@ function SectionTitle({ children, headingFamily, variant = 'line' }: {
 }
 
 // ─── Summary ───
-export function SummarySection({ data, bodyFamily, variant = 'default' }: SectionProps & { variant?: 'default' | 'plain' }) {
+export function SummarySection({ data, headingFamily, bodyFamily, variant = 'default' }: SectionProps & { variant?: 'default' | 'plain' }) {
   if (!data.summary) return null
   return (
     <section className="mb-2.5">
-      {variant !== 'plain' && <SectionTitle headingFamily={data.headingFont}>个人简介</SectionTitle>}
+      {variant !== 'plain' && <SectionTitle headingFamily={headingFamily}>个人简介</SectionTitle>}
       <p style={{ fontFamily: bodyFamily }} className="text-[8.5pt] text-[#57534e] leading-[1.55]">{data.summary}</p>
     </section>
   )
