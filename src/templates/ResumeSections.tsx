@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { useStore, type EditFocus } from '../store'
-import type { ResumeData, SectionId } from '../types'
-import { SECTION_LABELS } from '../types'
+import { useStore } from '../store'
+import type { ResumeData } from '../types'
+import { SECTION_LABELS, getSectionLabel } from '../types'
 
 interface SectionProps {
   data: ResumeData
@@ -10,7 +10,7 @@ interface SectionProps {
 }
 
 export function SectionHighlight({ sectionId, itemId, children }: {
-  sectionId: SectionId
+  sectionId: string
   itemId?: string
   children: React.ReactNode
 }) {
@@ -52,7 +52,7 @@ export function SummarySection({ data, headingFamily, variant = 'default' }: Sec
   return (
     <SectionHighlight sectionId="summary">
       <section className="mb-2.5">
-        {variant !== 'plain' && <SectionTitle headingFamily={headingFamily}>{SECTION_LABELS.summary}</SectionTitle>}
+        {variant !== 'plain' && <SectionTitle headingFamily={headingFamily}>{getSectionLabel('summary', data)}</SectionTitle>}
         <p className="text-[8.5pt] text-[#57534e] leading-[1.55] whitespace-pre-line">{data.summary}</p>
       </section>
     </SectionHighlight>
@@ -64,7 +64,7 @@ export function ExperienceSection({ data, headingFamily, variant = 'line' }: Sec
   return (
     <SectionHighlight sectionId="experience">
       <section className="mb-2.5">
-        <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.experience}</SectionTitle>
+        <SectionTitle headingFamily={headingFamily} variant={variant}>{getSectionLabel('experience', data)}</SectionTitle>
         {data.experiences.map((exp) => (
           <SectionHighlight key={exp.id} sectionId="experience" itemId={exp.id}>
             <div className="mb-1.5">
@@ -91,7 +91,7 @@ export function ProjectSection({ data, headingFamily, variant = 'line' }: Sectio
   return (
     <SectionHighlight sectionId="projects">
       <section className="mb-2.5">
-        <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.projects}</SectionTitle>
+        <SectionTitle headingFamily={headingFamily} variant={variant}>{getSectionLabel('projects', data)}</SectionTitle>
         {data.projects.map((proj) => (
           <SectionHighlight key={proj.id} sectionId="projects" itemId={proj.id}>
             <div className="mb-1.5">
@@ -118,7 +118,7 @@ export function EducationSection({ data, headingFamily, variant = 'line' }: Sect
   return (
     <SectionHighlight sectionId="education">
       <section className="mb-2.5">
-        <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.education}</SectionTitle>
+        <SectionTitle headingFamily={headingFamily} variant={variant}>{getSectionLabel('education', data)}</SectionTitle>
         {data.education.map((edu) => (
           <SectionHighlight key={edu.id} sectionId="education" itemId={edu.id}>
             <div className="flex items-baseline justify-between mb-0.5">
@@ -141,7 +141,7 @@ export function SkillsSection({ data, headingFamily, variant = 'line', chipBg = 
   return (
     <SectionHighlight sectionId="skills">
       <section>
-        <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.skills}</SectionTitle>
+        <SectionTitle headingFamily={headingFamily} variant={variant}>{getSectionLabel('skills', data)}</SectionTitle>
         <div className="flex flex-wrap gap-1.5">
           {skills.map((skill, i) => (
             <span key={i} className={`inline-flex items-center text-[8.5pt] leading-none text-[#57534e] px-2 py-1 rounded ${chipBg ? 'bg-[#f5f5f4]' : ''}`}>
@@ -160,7 +160,7 @@ export function SkillsListSection({ data, headingFamily, variant = 'plain' }: Se
   return (
     <SectionHighlight sectionId="skills">
       <section>
-        <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.skills}</SectionTitle>
+        <SectionTitle headingFamily={headingFamily} variant={variant}>{getSectionLabel('skills', data)}</SectionTitle>
         <div className="space-y-0.5">
           {skills.map((skill, i) => (
             <p key={i} className="text-[8pt] text-[#57534e] leading-[1.4]">{skill}</p>
@@ -176,7 +176,7 @@ export function EducationCompactSection({ data, headingFamily, variant = 'plain'
   return (
     <SectionHighlight sectionId="education">
       <section>
-        <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.education}</SectionTitle>
+        <SectionTitle headingFamily={headingFamily} variant={variant}>{getSectionLabel('education', data)}</SectionTitle>
         {data.education.map((edu) => (
           <SectionHighlight key={edu.id} sectionId="education" itemId={edu.id}>
             <div className="mb-1.5">
@@ -197,7 +197,7 @@ export function SkillsDarkSection({ data, headingFamily }: SectionProps) {
   return (
     <SectionHighlight sectionId="skills">
       <section>
-        <h2 style={{ fontFamily: headingFamily }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5">{SECTION_LABELS.skills}</h2>
+        <h2 style={{ fontFamily: headingFamily }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5">{getSectionLabel('skills', data)}</h2>
         <div className="space-y-0.5">
           {skills.map((skill, i) => (
             <p key={i} className="text-[8pt] text-[#d6d3d1] leading-[1.4]">{skill}</p>
@@ -213,7 +213,7 @@ export function EducationDarkSection({ data, headingFamily }: SectionProps) {
   return (
     <SectionHighlight sectionId="education">
       <section>
-        <h2 style={{ fontFamily: headingFamily }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5">{SECTION_LABELS.education}</h2>
+        <h2 style={{ fontFamily: headingFamily }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5">{getSectionLabel('education', data)}</h2>
         {data.education.map((edu) => (
           <SectionHighlight key={edu.id} sectionId="education" itemId={edu.id}>
             <div className="mb-1.5">
@@ -228,8 +228,21 @@ export function EducationDarkSection({ data, headingFamily }: SectionProps) {
   )
 }
 
+export function CustomTextSection({ data, headingFamily, sectionId, variant = 'line' }: SectionProps & { sectionId: string; variant?: 'line' | 'plain' | 'bold' }) {
+  const section = data.customSections.find((s) => s.id === sectionId)
+  if (!section || !section.content) return null
+  return (
+    <SectionHighlight sectionId={sectionId}>
+      <section className="mb-2.5">
+        <SectionTitle headingFamily={headingFamily} variant={variant}>{section.title}</SectionTitle>
+        <p className="text-[8.5pt] text-[#57534e] leading-[1.5] whitespace-pre-line">{section.content}</p>
+      </section>
+    </SectionHighlight>
+  )
+}
+
 export function renderSection(
-  id: SectionId,
+  id: string,
   props: SectionProps,
   template: 'classic' | 'minimal' | 'modern',
 ) {
@@ -246,7 +259,9 @@ export function renderSection(
     case 'skills':
       if (template === 'minimal') return <SkillsListSection {...props} variant="plain" />
       return <SkillsSection {...props} variant={template === 'modern' ? 'bold' : 'line'} chipBg={template !== 'classic'} />
-    default:
-      return null
+    default: {
+      const variant = template === 'minimal' ? 'plain' : template === 'modern' ? 'bold' : 'line'
+      return <CustomTextSection {...props} sectionId={id} variant={variant} />
+    }
   }
 }

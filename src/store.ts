@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { ResumeData, TemplateId, Experience, Education, Project, SectionId } from './types'
+import type { ResumeData, TemplateId, Experience, Education, Project, CustomSection } from './types'
 import { DEFAULT_RESUME, uid } from './types'
 
-export type EditFocus = { section: SectionId; itemId?: string } | null
+export type EditFocus = { section: string; itemId?: string } | null
 
 interface Store {
   data: ResumeData
@@ -13,7 +13,13 @@ interface Store {
   setTemplate: (t: TemplateId) => void
   update: (partial: Partial<ResumeData>) => void
   // Sections
-  reorderSections: (order: SectionId[]) => void
+  reorderSections: (order: string[]) => void
+  setSectionLabel: (id: string, label: string) => void
+  removeSection: (id: string) => void
+  addSection: (id: string) => void
+  addCustomSection: () => void
+  updateCustomSection: (id: string, partial: Partial<CustomSection>) => void
+  removeCustomSection: (id: string) => void
   setHeadingFont: (fontId: string) => void
   setBodyFont: (fontId: string) => void
   setPhoto: (photo: string) => void
@@ -49,6 +55,46 @@ export const useStore = create<Store>()(
 
   reorderSections: (order) =>
     set((s) => ({ data: { ...s.data, sectionOrder: order } })),
+
+  setSectionLabel: (id, label) =>
+    set((s) => ({ data: { ...s.data, sectionLabels: { ...s.data.sectionLabels, [id]: label } } })),
+
+  removeSection: (id) =>
+    set((s) => ({ data: { ...s.data, sectionOrder: s.data.sectionOrder.filter((sid) => sid !== id) } })),
+
+  addSection: (id) =>
+    set((s) => ({
+      data: { ...s.data, sectionOrder: s.data.sectionOrder.includes(id) ? s.data.sectionOrder : [...s.data.sectionOrder, id] },
+    })),
+
+  addCustomSection: () =>
+    set((s) => {
+      const id = `custom-${uid()}`
+      return {
+        data: {
+          ...s.data,
+          customSections: [...s.data.customSections, { id, title: '自定义模块', content: '' }],
+          sectionOrder: [...s.data.sectionOrder, id],
+        },
+      }
+    }),
+
+  updateCustomSection: (id, partial) =>
+    set((s) => ({
+      data: {
+        ...s.data,
+        customSections: s.data.customSections.map((c) => (c.id === id ? { ...c, ...partial } : c)),
+      },
+    })),
+
+  removeCustomSection: (id) =>
+    set((s) => ({
+      data: {
+        ...s.data,
+        customSections: s.data.customSections.filter((c) => c.id !== id),
+        sectionOrder: s.data.sectionOrder.filter((sid) => sid !== id),
+      },
+    })),
 
   setHeadingFont: (fontId) =>
     set((s) => ({ data: { ...s.data, headingFont: fontId } })),

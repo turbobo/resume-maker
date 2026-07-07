@@ -1,7 +1,8 @@
 import { useState, useRef, useMemo, memo, useCallback } from 'react'
-import { useStore, type EditFocus } from '../store'
-import type { Experience, Education, Project, SectionId } from '../types'
-import { SECTION_LABELS } from '../types'
+import { useStore } from '../store'
+import type { Experience, Education, Project, CustomSection } from '../types'
+import { SECTION_LABELS, BUILTIN_SECTIONS, getSectionLabel } from '../types'
+import type { SectionId } from '../types'
 import ATSPanel from './ATSPanel'
 import { normalizeDate } from '../utils/dateFormat'
 import { compressPhoto } from '../utils/photoCompress'
@@ -59,7 +60,7 @@ function useDragSort<T extends { id: string }>(
 
 // ─── Edit focus hook ───
 
-function useEditFocus(section: SectionId, itemId?: string) {
+function useEditFocus(section: string, itemId?: string) {
   const setEditFocus = useStore((s) => s.setEditFocus)
   return {
     onFocus: useCallback(() => setEditFocus({ section, itemId }), [setEditFocus, section, itemId]),
@@ -333,17 +334,32 @@ const ProjectCard = memo(function ProjectCard({ item, dragHandle, isDragging, is
   )
 })
 
-// ─── Drag-to-reorder section order ───
+// ─── Section order with rename / delete / add ───
 
 function SectionOrder() {
   const sectionOrder = useStore((s) => s.data.sectionOrder)
+  const data = useStore((s) => s.data)
   const reorderSections = useStore((s) => s.reorderSections)
+  const setSectionLabel = useStore((s) => s.setSectionLabel)
+  const removeSection = useStore((s) => s.removeSection)
+  const addSection = useStore((s) => s.addSection)
+  const addCustomSection = useStore((s) => s.addCustomSection)
+  const removeCustomSection = useStore((s) => s.removeCustomSection)
+
   const [dragging, setDragging] = useState<number | null>(null)
   const [dropTarget, setDropTarget] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [labelDraft, setLabelDraft] = useState('')
+  const [showAdd, setShowAdd] = useState(false)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
   const dragIndexRef = useRef<number | null>(null)
   const sectionOrderRef = useRef(sectionOrder)
   sectionOrderRef.current = sectionOrder
+
+  const removableIds = useMemo(() => {
+    const orderSet = new Set(sectionOrder)
+    return BUILTIN_SECTIONS.filter((id) => !orderSet.has(id))
+  }, [sectionOrder])
 
   const getDropIndex = useCallback((clientY: number): number => {
     const rects = itemRefs.current.map((el) => el?.getBoundingClientRect())
@@ -388,30 +404,40 @@ function SectionOrder() {
     window.addEventListener('pointerup', onUp)
   }, [getDropIndex, reorderSections])
 
-  const moveUp = (idx: number) => {
-    if (idx === 0) return
-    const newOrder = [...sectionOrder]
-    ;[newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]]
-    reorderSections(newOrder)
+  const startEditing = (id: string) => {
+    setEditingId(id)
+    setLabelDraft(getSectionLabel(id, data))
   }
 
-  const moveDown = (idx: number) => {
-    if (idx === sectionOrder.length - 1) return
-    const newOrder = [...sectionOrder]
-    ;[newOrder[idx], newOrder[idx + 1]] = [newOrder[idx + 1], newOrder[idx]]
-    reorderSections(newOrder)
+  const saveLabel = (id: string) => {
+    const trimmed = labelDraft.trim()
+    if (trimmed && trimmed !== (SECTION_LABELS[id as SectionId] || '')) {
+      setSectionLabel(id, trimmed)
+    } else if (!trimmed || trimmed === SECTION_LABELS[id as SectionId]) {
+      const { [id]: _, ...rest } = data.sectionLabels
+      useStore.getState().update({ sectionLabels: rest })
+    }
+    setEditingId(null)
+  }
+
+  const handleDelete = (id: string) => {
+    if (id.startsWith('custom-')) {
+      removeCustomSection(id)
+    } else {
+      removeSection(id)
+    }
   }
 
   return (
     <section>
-      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">模块排序</h3>
-      <p className="text-[12px] md:text-[10px] text-[var(--text-3)] mb-2">拖拽或使用箭头调整简历模块顺序</p>
+      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">模块管理</h3>
+      <p className="text-[12px] md:text-[10px] text-[var(--text-3)] mb-2">拖拽排序 · 点击名称重命名 · 可删除或新增模块</p>
       <div className="space-y-1.5 md:space-y-1">
         {sectionOrder.map((id, idx) => (
           <div
             key={id}
             ref={(el) => { itemRefs.current[idx] = el }}
-            className={`flex items-center gap-2 px-3 md:px-2.5 py-2.5 md:py-1.5 rounded border bg-[var(--surface)] transition-all select-none
+            className={`flex items-center gap-1.5 px-3 md:px-2.5 py-2.5 md:py-1.5 rounded border bg-[var(--surface)] transition-all select-none
               ${dragging === idx ? 'opacity-40 scale-[0.97] border-[var(--border)]' :
                 dropTarget === idx && dragging !== null ? 'border-[var(--accent)] bg-[var(--accent)]/5 shadow-sm' :
                 'border-[var(--border)] hover:border-[var(--border-strong)]'}`}
@@ -420,7 +446,7 @@ function SectionOrder() {
               onPointerDown={(e) => handlePointerDown(e, idx)}
               aria-label="拖拽排序"
               style={{ touchAction: 'none' }}
-              className="cursor-grab active:cursor-grabbing p-0.5 -ml-0.5 rounded hover:bg-[var(--bg)] transition-colors"
+              className="cursor-grab active:cursor-grabbing p-0.5 -ml-0.5 rounded hover:bg-[var(--bg)] transition-colors shrink-0"
             >
               <svg aria-hidden="true" className="w-4 h-4 md:w-3.5 md:h-3.5 text-[var(--text-3)]" viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
@@ -428,27 +454,92 @@ function SectionOrder() {
                 <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
               </svg>
             </div>
-            <span className="text-[14px] md:text-[12px] font-medium flex-1">{SECTION_LABELS[id]}</span>
-            <div className="flex gap-1 md:gap-0.5">
-              <button
-                onClick={() => moveUp(idx)}
-                disabled={idx === 0}
-                aria-label={`上移${SECTION_LABELS[id]}`}
-                className="w-8 h-8 md:w-5 md:h-5 rounded flex items-center justify-center text-[14px] md:text-[10px] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-30 transition-colors"
+            {editingId === id ? (
+              <input
+                value={labelDraft}
+                onChange={(e) => setLabelDraft(e.target.value)}
+                onBlur={() => saveLabel(id)}
+                onKeyDown={(e) => { if (e.key === 'Enter') saveLabel(id); if (e.key === 'Escape') setEditingId(null) }}
+                autoFocus
+                className="flex-1 text-[14px] md:text-[12px] font-medium bg-transparent border-b border-[var(--accent)] outline-none py-0"
+              />
+            ) : (
+              <span
+                onClick={() => startEditing(id)}
+                className="text-[14px] md:text-[12px] font-medium flex-1 cursor-text hover:text-[var(--accent)] transition-colors"
               >
-                ↑
-              </button>
-              <button
-                onClick={() => moveDown(idx)}
-                disabled={idx === sectionOrder.length - 1}
-                aria-label={`下移${SECTION_LABELS[id]}`}
-                className="w-8 h-8 md:w-5 md:h-5 rounded flex items-center justify-center text-[14px] md:text-[10px] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-30 transition-colors"
-              >
-                ↓
-              </button>
-            </div>
+                {getSectionLabel(id, data)}
+              </span>
+            )}
+            <button
+              onClick={() => handleDelete(id)}
+              aria-label="删除模块"
+              className="w-7 h-7 md:w-5 md:h-5 rounded flex items-center justify-center text-[11px] md:text-[10px] text-[var(--text-3)] hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+            >
+              ✕
+            </button>
           </div>
         ))}
+      </div>
+
+      {/* Add section */}
+      <div className="mt-2">
+        <button
+          onClick={() => setShowAdd(!showAdd)}
+          className="text-[13px] md:text-[11px] text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+        >
+          + 添加模块
+        </button>
+        {showAdd && (
+          <div className="mt-1.5 space-y-1 p-2 rounded border border-[var(--border)] bg-[var(--surface)]">
+            {removableIds.map((id) => (
+              <button
+                key={id}
+                onClick={() => { addSection(id); setShowAdd(false) }}
+                className="w-full text-left px-2.5 py-2 md:py-1.5 rounded text-[13px] md:text-[12px] text-[var(--text-2)] hover:bg-[var(--bg)] hover:text-[var(--text)] transition-colors"
+              >
+                {SECTION_LABELS[id as SectionId]}
+              </button>
+            ))}
+            <button
+              onClick={() => { addCustomSection(); setShowAdd(false) }}
+              className="w-full text-left px-2.5 py-2 md:py-1.5 rounded text-[13px] md:text-[12px] text-[var(--accent)] hover:bg-[var(--accent)]/5 transition-colors"
+            >
+              + 自定义模块
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+// ─── Custom section editor ───
+
+function CustomSectionEditor({ section }: { section: CustomSection }) {
+  const updateCustomSection = useStore((s) => s.updateCustomSection)
+  const { onFocus, onBlur } = useEditFocus(section.id)
+
+  return (
+    <section>
+      <Input
+        label="模块标题"
+        value={section.title}
+        onChange={(v) => updateCustomSection(section.id, { title: v })}
+        placeholder="自定义模块名称"
+        onFocus={onFocus}
+        onBlur={onBlur}
+      />
+      <div className="mt-2">
+        <TextArea
+          label="内容"
+          value={section.content}
+          onChange={(v) => updateCustomSection(section.id, { content: v })}
+          placeholder="输入自定义内容..."
+          rows={3}
+          onFocus={onFocus}
+          onBlur={onBlur}
+        />
       </div>
     </section>
   )
@@ -485,7 +576,6 @@ function BasicInfoSection() {
         <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)]">基本信息</h3>
       </div>
       <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
-      {/* Photo upload — stacked on mobile, inline on desktop */}
       <div className="flex flex-col md:flex-row gap-3 mb-2">
         <div className="flex items-center gap-3 md:block">
           <button
@@ -546,11 +636,12 @@ function BasicInfoSection() {
 function SummarySection() {
   const summary = useStore((s) => s.data.summary)
   const update = useStore((s) => s.update)
+  const label = useStore((s) => getSectionLabel('summary', s.data))
   const { onFocus, onBlur } = useEditFocus('summary')
 
   return (
     <section>
-      <TextArea label="个人简介" value={summary} onChange={(v) => update({ summary: v })} placeholder="简要描述你的职业背景和核心优势..." rows={3} onFocus={onFocus} onBlur={onBlur} />
+      <TextArea label={label} value={summary} onChange={(v) => update({ summary: v })} placeholder="简要描述你的职业背景和核心优势..." rows={3} onFocus={onFocus} onBlur={onBlur} />
     </section>
   )
 }
@@ -558,6 +649,7 @@ function SummarySection() {
 function SkillsEditorSection() {
   const skills = useStore((s) => s.data.skills)
   const update = useStore((s) => s.update)
+  const label = useStore((s) => getSectionLabel('skills', s.data))
   const { onFocus, onBlur } = useEditFocus('skills')
   const [input, setInput] = useState('')
 
@@ -588,7 +680,7 @@ function SkillsEditorSection() {
 
   return (
     <section>
-      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">技能</h3>
+      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">{label}</h3>
       <div className="flex flex-wrap gap-1.5 p-2.5 md:p-2 rounded border border-[var(--border)] bg-[var(--surface)] min-h-[44px] md:min-h-[36px] cursor-text"
         onClick={(e) => { const inp = (e.currentTarget as HTMLElement).querySelector('input'); inp?.focus() }}
       >
@@ -623,11 +715,12 @@ function ExperiencesSection() {
   const experiences = useStore((s) => s.data.experiences)
   const addExperience = useStore((s) => s.addExperience)
   const reorderExperiences = useStore((s) => s.reorderExperiences)
+  const label = useStore((s) => getSectionLabel('experience', s.data))
   const { dragging, dropTarget, itemRefs, startDrag } = useDragSort(experiences, reorderExperiences)
 
   return (
     <section>
-      <SectionHeader title="工作经历" onAdd={addExperience} />
+      <SectionHeader title={label} onAdd={addExperience} />
       {experiences.map((exp, idx) => (
         <div key={exp.id} ref={(el) => { itemRefs.current[idx] = el }}>
           <ExperienceCard
@@ -646,11 +739,12 @@ function EducationEditorSection() {
   const education = useStore((s) => s.data.education)
   const addEducation = useStore((s) => s.addEducation)
   const reorderEducation = useStore((s) => s.reorderEducation)
+  const label = useStore((s) => getSectionLabel('education', s.data))
   const { dragging, dropTarget, itemRefs, startDrag } = useDragSort(education, reorderEducation)
 
   return (
     <section>
-      <SectionHeader title="教育背景" onAdd={addEducation} />
+      <SectionHeader title={label} onAdd={addEducation} />
       {education.map((edu, idx) => (
         <div key={edu.id} ref={(el) => { itemRefs.current[idx] = el }}>
           <EducationCard
@@ -669,11 +763,12 @@ function ProjectsSection() {
   const projects = useStore((s) => s.data.projects)
   const addProject = useStore((s) => s.addProject)
   const reorderProjects = useStore((s) => s.reorderProjects)
+  const label = useStore((s) => getSectionLabel('projects', s.data))
   const { dragging, dropTarget, itemRefs, startDrag } = useDragSort(projects, reorderProjects)
 
   return (
     <section>
-      <SectionHeader title="项目经历" onAdd={addProject} />
+      <SectionHeader title={label} onAdd={addProject} />
       {projects.map((proj, idx) => (
         <div key={proj.id} ref={(el) => { itemRefs.current[idx] = el }}>
           <ProjectCard
@@ -691,16 +786,23 @@ function ProjectsSection() {
 // ─── Main Editor Panel ───
 
 export default function EditorPanel() {
+  const sectionOrder = useStore((s) => s.data.sectionOrder)
+  const customSections = useStore((s) => s.data.customSections)
+  const activeSet = useMemo(() => new Set(sectionOrder), [sectionOrder])
+
   return (
     <aside className="w-full md:w-[360px] flex-1 md:flex-none shrink-0 md:border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-5 md:p-4 space-y-6 md:space-y-5">
       <ATSPanel />
       <SectionOrder />
       <BasicInfoSection />
-      <SummarySection />
-      <SkillsEditorSection />
-      <ExperiencesSection />
-      <EducationEditorSection />
-      <ProjectsSection />
+      {activeSet.has('summary') && <SummarySection />}
+      {activeSet.has('skills') && <SkillsEditorSection />}
+      {activeSet.has('experience') && <ExperiencesSection />}
+      {activeSet.has('education') && <EducationEditorSection />}
+      {activeSet.has('projects') && <ProjectsSection />}
+      {customSections.filter((s) => activeSet.has(s.id)).map((s) => (
+        <CustomSectionEditor key={s.id} section={s} />
+      ))}
     </aside>
   )
 }

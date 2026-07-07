@@ -26,6 +26,12 @@ export interface Project {
   description: string
 }
 
+export interface CustomSection {
+  id: string
+  title: string
+  content: string
+}
+
 export type SectionId = 'basic' | 'summary' | 'experience' | 'projects' | 'education' | 'skills'
 
 export const SECTION_LABELS: Record<SectionId, string> = {
@@ -36,6 +42,8 @@ export const SECTION_LABELS: Record<SectionId, string> = {
   education: '教育背景',
   skills: '技能',
 }
+
+export const BUILTIN_SECTIONS: SectionId[] = ['summary', 'experience', 'projects', 'education', 'skills']
 
 export const DEFAULT_ORDER: SectionId[] = ['summary', 'experience', 'projects', 'education', 'skills']
 
@@ -66,7 +74,9 @@ export interface ResumeData {
   experiences: Experience[]
   education: Education[]
   projects: Project[]
-  sectionOrder: SectionId[]
+  sectionOrder: string[]
+  sectionLabels: Record<string, string>
+  customSections: CustomSection[]
   headingFont: string
   bodyFont: string
 }
@@ -123,6 +133,8 @@ export const DEFAULT_RESUME: ResumeData = {
     },
   ],
   sectionOrder: [...DEFAULT_ORDER],
+  sectionLabels: {},
+  customSections: [],
   headingFont: 'noto-sans',
   bodyFont: 'noto-sans',
 }
@@ -134,3 +146,10 @@ export function resolveFontFamily(fontId: string): string {
 }
 
 export const SIDEBAR_SECTIONS = new Set<SectionId>(['education', 'skills'])
+
+export function getSectionLabel(id: string, data: ResumeData): string {
+  if (data.sectionLabels[id]) return data.sectionLabels[id]
+  if (id in SECTION_LABELS) return SECTION_LABELS[id as SectionId]
+  const custom = data.customSections.find((s) => s.id === id)
+  return custom?.title || ''
+}

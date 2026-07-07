@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { ResumeData } from '../types'
-import { resolveFontFamily, SIDEBAR_SECTIONS } from '../types'
+import { resolveFontFamily, SIDEBAR_SECTIONS, getSectionLabel } from '../types'
 import { renderSection, SectionHighlight } from './ResumeSections'
 
 export default function ExecutiveTemplate({ data }: { data: ResumeData }) {
@@ -64,7 +64,7 @@ export default function ExecutiveTemplate({ data }: { data: ResumeData }) {
         {skills.length > 0 && (
           <SectionHighlight sectionId="skills">
             <div>
-              <h2 style={{ fontFamily: headingFont }} className="text-[7.5pt] font-bold uppercase tracking-[0.15em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">专业技能</h2>
+              <h2 style={{ fontFamily: headingFont }} className="text-[7.5pt] font-bold uppercase tracking-[0.15em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{getSectionLabel('skills', data)}</h2>
               <div className="flex flex-wrap gap-1">
                 {skills.map((skill, i) => (
                   <span key={i} className="text-[7.5pt] text-[#57534e] bg-white px-1.5 py-0.5 rounded border border-[#e7e5e4]">
@@ -80,7 +80,7 @@ export default function ExecutiveTemplate({ data }: { data: ResumeData }) {
         {data.education.length > 0 && (
           <SectionHighlight sectionId="education">
             <div>
-              <h2 style={{ fontFamily: headingFont }} className="text-[7.5pt] font-bold uppercase tracking-[0.15em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">教育背景</h2>
+              <h2 style={{ fontFamily: headingFont }} className="text-[7.5pt] font-bold uppercase tracking-[0.15em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{getSectionLabel('education', data)}</h2>
               {data.education.map((edu) => (
                 <SectionHighlight key={edu.id} sectionId="education" itemId={edu.id}>
                   <div className="mb-1.5">
@@ -101,7 +101,7 @@ export default function ExecutiveTemplate({ data }: { data: ResumeData }) {
         <SectionHighlight sectionId="summary">
           {data.summary && (
             <div className="mb-2.5">
-              <h2 style={{ fontFamily: headingFont }} className="text-[9.5pt] font-bold mb-1 pb-1 border-b border-[#e7e5e4]">个人简介</h2>
+              <h2 style={{ fontFamily: headingFont }} className="text-[9.5pt] font-bold mb-1 pb-1 border-b border-[#e7e5e4]">{getSectionLabel('summary', data)}</h2>
               <p className="text-[8.5pt] text-[#57534e] leading-[1.5] whitespace-pre-line">{data.summary}</p>
             </div>
           )}

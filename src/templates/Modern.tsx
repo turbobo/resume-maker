@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { ResumeData } from '../types'
-import { resolveFontFamily, SIDEBAR_SECTIONS, SECTION_LABELS } from '../types'
+import { resolveFontFamily, SIDEBAR_SECTIONS, getSectionLabel } from '../types'
 import { renderSection, SectionHighlight } from './ResumeSections'
 
 export default function ModernTemplate({ data }: { data: ResumeData }) {
@@ -41,7 +41,7 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
         {skills.length > 0 && (
           <SectionHighlight sectionId="skills">
             <div>
-              <h2 style={{ fontFamily: headingFont }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{SECTION_LABELS.skills}</h2>
+              <h2 style={{ fontFamily: headingFont }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{getSectionLabel('skills', data)}</h2>
               <div className="flex flex-wrap gap-1">
                 {skills.map((skill, i) => (
                   <span key={i} className="text-[7.5pt] text-[#57534e] bg-white px-1.5 py-0.5 rounded border border-[#e7e5e4]">
@@ -57,7 +57,7 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
         {data.education.length > 0 && (
           <SectionHighlight sectionId="education">
             <div>
-              <h2 style={{ fontFamily: headingFont }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{SECTION_LABELS.education}</h2>
+              <h2 style={{ fontFamily: headingFont }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{getSectionLabel('education', data)}</h2>
               {data.education.map((edu) => (
                 <SectionHighlight key={edu.id} sectionId="education" itemId={edu.id}>
                   <div className="mb-1.5">
