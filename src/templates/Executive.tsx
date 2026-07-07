@@ -109,7 +109,7 @@ export default function ExecutiveTemplate({ data }: { data: ResumeData }) {
 
         {/* Main sections (exclude sidebar ones) */}
         {data.sectionOrder
-          .filter((id) => !SIDEBAR_SECTIONS.has(id) && id !== 'summary')
+          .filter((id): id is string => !(SIDEBAR_SECTIONS as Set<string>).has(id) && id !== 'summary')
           .map((id) => (
             <div key={id}>{renderSection(id, { data, headingFamily: headingFont, bodyFamily: bodyFont }, 'classic')}</div>
           ))}

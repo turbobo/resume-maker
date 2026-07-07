@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useStore } from '../store'
 import type { ResumeData } from '../types'
-import { SECTION_LABELS, getSectionLabel } from '../types'
+import { getSectionLabel } from '../types'
 
 interface SectionProps {
   data: ResumeData

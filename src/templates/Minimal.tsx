@@ -34,12 +34,12 @@ export default function MinimalTemplate({ data }: { data: ResumeData }) {
       {/* Two-column layout */}
       <div className="grid grid-cols-[1fr_160px] gap-6">
         <div className="space-y-3">
-          {data.sectionOrder.filter((id) => !SIDEBAR_SECTIONS.has(id)).map((id) => (
+          {data.sectionOrder.filter((id): id is string => !(SIDEBAR_SECTIONS as Set<string>).has(id)).map((id) => (
             <div key={id}>{renderSection(id, { data, headingFamily: headingFont, bodyFamily: bodyFont }, 'minimal')}</div>
           ))}
         </div>
         <div className="space-y-3">
-          {data.sectionOrder.filter((id) => SIDEBAR_SECTIONS.has(id)).map((id) => (
+          {data.sectionOrder.filter((id): id is string => (SIDEBAR_SECTIONS as Set<string>).has(id)).map((id) => (
             <div key={id}>{renderSection(id, { data, headingFamily: headingFont, bodyFamily: bodyFont }, 'minimal')}</div>
           ))}
         </div>

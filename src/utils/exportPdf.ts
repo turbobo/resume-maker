@@ -17,6 +17,11 @@ export async function exportPdf() {
   const nameEl = element.querySelector('h1')
   const name = nameEl?.textContent?.trim() || '简历'
 
+  // 等待所有字体加载完成，避免导出 PDF 时字体回退
+  if (document.fonts?.ready) {
+    await document.fonts.ready
+  }
+
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import('html2canvas'),
     import('jspdf'),

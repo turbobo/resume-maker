@@ -79,7 +79,7 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
             <p className="text-[9pt] text-[#57534e] leading-[1.6] whitespace-pre-line">{data.summary}</p>
           )}
         </SectionHighlight>
-        {data.sectionOrder.filter((id) => !SIDEBAR_SECTIONS.has(id) && id !== 'summary').map((id) => (
+        {data.sectionOrder.filter((id): id is string => !(SIDEBAR_SECTIONS as Set<string>).has(id) && id !== 'summary').map((id) => (
           <div key={id}>{renderSection(id, { data, headingFamily: headingFont, bodyFamily: bodyFont }, 'modern')}</div>
         ))}
       </div>
