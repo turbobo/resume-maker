@@ -1,4 +1,4 @@
-import { useState, useRef, memo, useCallback } from 'react'
+import { useState, useRef, useMemo, memo, useCallback } from 'react'
 import { useStore, type EditFocus } from '../store'
 import type { Experience, Education, Project, SectionId } from '../types'
 import { SECTION_LABELS } from '../types'
@@ -499,10 +499,62 @@ function SkillsEditorSection() {
   const skills = useStore((s) => s.data.skills)
   const update = useStore((s) => s.update)
   const { onFocus, onBlur } = useEditFocus('skills')
+  const [input, setInput] = useState('')
+
+  const skillList = useMemo(() => skills.split(',').map((s) => s.trim()).filter(Boolean), [skills])
+
+  const addSkill = useCallback((name: string) => {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    const next = [...skillList, trimmed]
+    update({ skills: next.join(', ') })
+    setInput('')
+  }, [skillList, update])
+
+  const removeSkill = useCallback((index: number) => {
+    const next = skillList.filter((_, i) => i !== index)
+    update({ skills: next.join(', ') })
+  }, [skillList, update])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addSkill(input)
+    }
+    if (e.key === 'Backspace' && !input && skillList.length > 0) {
+      removeSkill(skillList.length - 1)
+    }
+  }, [input, addSkill, removeSkill, skillList.length])
 
   return (
     <section>
-      <TextArea label="技能（逗号分隔）" value={skills} onChange={(v) => update({ skills: v })} placeholder="React, TypeScript, Node.js..." rows={2} onFocus={onFocus} onBlur={onBlur} />
+      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">技能</h3>
+      <div className="flex flex-wrap gap-1.5 p-2.5 md:p-2 rounded border border-[var(--border)] bg-[var(--surface)] min-h-[44px] md:min-h-[36px] cursor-text"
+        onClick={(e) => { const inp = (e.currentTarget as HTMLElement).querySelector('input'); inp?.focus() }}
+      >
+        {skillList.map((skill, i) => (
+          <span key={i} className="inline-flex items-center gap-1 text-[13px] md:text-[12px] bg-[var(--bg)] pl-2.5 pr-1.5 py-1 rounded text-[var(--text)]">
+            {skill}
+            <button
+              onClick={(e) => { e.stopPropagation(); removeSkill(i) }}
+              aria-label={`删除${skill}`}
+              className="w-5 h-5 md:w-4 md:h-4 rounded flex items-center justify-center text-[11px] md:text-[10px] text-[var(--text-3)] hover:text-red-500 hover:bg-red-50 transition-colors"
+            >
+              ✕
+            </button>
+          </span>
+        ))}
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={onFocus}
+          onBlur={() => { if (input.trim()) addSkill(input); onBlur() }}
+          placeholder={skillList.length === 0 ? '输入技能，回车添加' : '添加...'}
+          className="flex-1 min-w-[80px] text-base md:text-[13px] bg-transparent outline-none py-1 placeholder:text-[var(--text-3)]"
+        />
+      </div>
     </section>
   )
 }
