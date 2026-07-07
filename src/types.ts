@@ -60,6 +60,7 @@ export interface ResumeData {
   phone: string
   location: string
   website: string
+  photo: string
   summary: string
   skills: string
   experiences: Experience[]
@@ -70,7 +71,7 @@ export interface ResumeData {
   bodyFont: string
 }
 
-export type TemplateId = 'classic' | 'minimal' | 'modern'
+export type TemplateId = 'classic' | 'minimal' | 'modern' | 'compact' | 'executive'
 
 export const DEFAULT_RESUME: ResumeData = {
   name: '张三',
@@ -79,6 +80,7 @@ export const DEFAULT_RESUME: ResumeData = {
   phone: '138-0000-0000',
   location: '北京',
   website: '',
+  photo: '',
   summary: '8 年前端开发经验，擅长 React 生态和大型项目架构设计。主导过多个千万级用户产品的前端重构，对性能优化和工程化有深入实践。',
   skills: 'React, TypeScript, Next.js, Node.js, Tailwind CSS, Webpack, Vite, 性能优化, 微前端',
   experiences: [

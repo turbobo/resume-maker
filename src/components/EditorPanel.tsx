@@ -4,6 +4,7 @@ import type { Experience, Education, Project, SectionId } from '../types'
 import { SECTION_LABELS } from '../types'
 import ATSPanel from './ATSPanel'
 import { normalizeDate } from '../utils/dateFormat'
+import { compressPhoto } from '../utils/photoCompress'
 
 // ─── Generic drag-to-reorder hook ───
 
@@ -402,17 +403,58 @@ function BasicInfoSection() {
   const phone = useStore((s) => s.data.phone)
   const location = useStore((s) => s.data.location)
   const website = useStore((s) => s.data.website)
+  const photo = useStore((s) => s.data.photo)
   const update = useStore((s) => s.update)
+  const setPhoto = useStore((s) => s.setPhoto)
+  const photoRef = useRef<HTMLInputElement>(null)
   const { onFocus, onBlur } = useEditFocus('basic')
+
+  const handlePhotoChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const dataUrl = await compressPhoto(file)
+      setPhoto(dataUrl)
+    } catch { /* ignore */ }
+    e.target.value = ''
+  }, [setPhoto])
 
   return (
     <section>
-      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">基本信息</h3>
-      <div className="space-y-2">
-        <div className="grid grid-cols-2 gap-2">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)]">基本信息</h3>
+      </div>
+      <div className="flex gap-3 mb-2">
+        <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+        <button
+          onClick={() => photoRef.current?.click()}
+          className="shrink-0 w-16 h-16 md:w-14 md:h-14 rounded-lg border border-dashed border-[var(--border-strong)] bg-[var(--surface)] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[var(--accent)] transition-colors group"
+        >
+          {photo ? (
+            <img src={photo} alt="照片" className="w-full h-full object-cover" />
+          ) : (
+            <div className="text-center">
+              <svg aria-hidden="true" className="w-5 h-5 text-[var(--text-3)] group-hover:text-[var(--text-2)] mx-auto mb-0.5 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+              </svg>
+              <span className="text-[9px] text-[var(--text-3)]">照片</span>
+            </div>
+          )}
+        </button>
+        {photo && (
+          <button
+            onClick={() => setPhoto('')}
+            className="self-start text-[11px] text-[var(--text-3)] hover:text-red-500 transition-colors"
+          >
+            移除
+          </button>
+        )}
+        <div className="flex-1 grid grid-cols-2 gap-2">
           <Input label="姓名" value={name} onChange={(v) => update({ name: v })} placeholder="张三" onFocus={onFocus} onBlur={onBlur} />
           <Input label="职位" value={title} onChange={(v) => update({ title: v })} placeholder="前端工程师" onFocus={onFocus} onBlur={onBlur} />
         </div>
+      </div>
+      <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">
           <Input label="邮箱" value={email} onChange={(v) => update({ email: v })} placeholder="email@example.com" type="email" onFocus={onFocus} onBlur={onBlur} />
           <Input label="电话" value={phone} onChange={(v) => update({ phone: v })} placeholder="138-0000-0000" onFocus={onFocus} onBlur={onBlur} />

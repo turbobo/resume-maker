@@ -8,6 +8,8 @@ const TEMPLATES: { id: TemplateId; label: string }[] = [
   { id: 'classic', label: '经典' },
   { id: 'minimal', label: '极简' },
   { id: 'modern', label: '现代' },
+  { id: 'compact', label: '紧凑' },
+  { id: 'executive', label: '专业' },
 ]
 
 export default function TopBar() {

@@ -4,6 +4,8 @@ import { useStore } from '../store'
 const ClassicTemplate = lazy(() => import('../templates/Classic'))
 const MinimalTemplate = lazy(() => import('../templates/Minimal'))
 const ModernTemplate = lazy(() => import('../templates/Modern'))
+const CompactTemplate = lazy(() => import('../templates/Compact'))
+const ExecutiveTemplate = lazy(() => import('../templates/Executive'))
 
 const A4_WIDTH_PX = 794
 
@@ -30,6 +32,8 @@ export default function PreviewPanel() {
   const TemplateComponent =
     template === 'classic' ? ClassicTemplate :
     template === 'minimal' ? MinimalTemplate :
+    template === 'compact' ? CompactTemplate :
+    template === 'executive' ? ExecutiveTemplate :
     ModernTemplate
 
   return (

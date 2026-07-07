@@ -16,6 +16,7 @@ interface Store {
   reorderSections: (order: SectionId[]) => void
   setHeadingFont: (fontId: string) => void
   setBodyFont: (fontId: string) => void
+  setPhoto: (photo: string) => void
   // Experience
   addExperience: () => void
   updateExperience: (id: string, partial: Partial<Experience>) => void
@@ -54,6 +55,9 @@ export const useStore = create<Store>()(
 
   setBodyFont: (fontId) =>
     set((s) => ({ data: { ...s.data, bodyFont: fontId } })),
+
+  setPhoto: (photo) =>
+    set((s) => ({ data: { ...s.data, photo } })),
 
   addExperience: () =>
     set((s) => ({
@@ -122,6 +126,6 @@ export const useStore = create<Store>()(
   importData: (incoming) =>
     set((s) => ({ data: { ...s.data, ...incoming } })),
     }),
-    { name: 'resume-maker-storage' },
+    { name: 'resume-maker-storage', partialize: (s) => ({ data: s.data, template: s.template }) },
   ),
 )
