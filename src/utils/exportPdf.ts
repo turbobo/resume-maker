@@ -8,7 +8,7 @@ export async function exportPdf() {
   const savedZoom = element.style.zoom
   if (savedZoom && savedZoom !== '1') {
     element.style.zoom = '1'
-    await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))
   }
 
   const nameEl = element.querySelector('h1')
