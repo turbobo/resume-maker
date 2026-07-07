@@ -117,27 +117,26 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Right: Actions */}
-      <div className="flex items-center gap-2 shrink-0 ml-2">
+      {/* Right: Actions — desktop only */}
+      <div className="hidden md:flex items-center gap-2 shrink-0 ml-2">
         <input ref={fileRef} type="file" accept=".docx,.doc" className="hidden" onChange={handleImport} />
         <button
           onClick={() => fileRef.current?.click()}
-          className="hidden md:inline-flex px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors"
+          className="px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors"
         >
           导入 Word
         </button>
         <button
           onClick={handleExportDocx}
-          className="hidden md:inline-flex px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors"
+          className="px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-colors"
         >
           导出 Word
         </button>
         <button
           onClick={handleExportPdf}
-          className="px-2.5 md:px-3 py-1.5 rounded text-[11px] font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors"
+          className="px-3 py-1.5 rounded text-[11px] font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors"
         >
-          <span className="md:hidden">PDF</span>
-          <span className="hidden md:inline">导出 PDF</span>
+          导出 PDF
         </button>
       </div>
     </header>

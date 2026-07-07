@@ -55,7 +55,7 @@ function ItemCard({ children, onRemove }: { children: React.ReactNode; onRemove:
     <div className="relative p-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] mb-2 group">
       <button
         onClick={onRemove}
-        className="absolute top-2 right-2 w-5 h-5 rounded flex items-center justify-center text-[10px] text-[var(--text-3)] hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+        className="absolute top-2 right-2 w-7 h-7 md:w-5 md:h-5 rounded flex items-center justify-center text-[11px] md:text-[10px] text-[var(--text-3)] hover:text-red-500 hover:bg-red-50 md:opacity-0 md:group-hover:opacity-100 transition-all"
       >
         ✕
       </button>
