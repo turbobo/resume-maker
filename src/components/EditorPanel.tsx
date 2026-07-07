@@ -2,6 +2,7 @@ import { useState, useRef, memo, useCallback } from 'react'
 import { useStore } from '../store'
 import type { Experience, Education, Project } from '../types'
 import { SECTION_LABELS } from '../types'
+import ATSPanel from './ATSPanel'
 
 // ─── Generic drag-to-reorder hook ───
 
@@ -477,6 +478,7 @@ function ProjectsSection() {
 export default function EditorPanel() {
   return (
     <aside className="w-full md:w-[360px] flex-1 md:flex-none shrink-0 md:border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-5 md:p-4 space-y-6 md:space-y-5">
+      <ATSPanel />
       <SectionOrder />
       <BasicInfoSection />
       <SummarySection />
