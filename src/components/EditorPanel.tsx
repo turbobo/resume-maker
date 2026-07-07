@@ -142,30 +142,55 @@ const ProjectCard = memo(function ProjectCard({ item }: {
 function SectionOrder() {
   const sectionOrder = useStore((s) => s.data.sectionOrder)
   const reorderSections = useStore((s) => s.reorderSections)
-  const dragItem = useRef<number | null>(null)
-  const [dragOver, setDragOver] = useState<number | null>(null)
+  const [dragging, setDragging] = useState<number | null>(null)
+  const [dropTarget, setDropTarget] = useState<number | null>(null)
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const dragIndexRef = useRef<number | null>(null)
+  const sectionOrderRef = useRef(sectionOrder)
+  sectionOrderRef.current = sectionOrder
 
-  const handleDragStart = (idx: number) => {
-    dragItem.current = idx
-  }
+  const getDropIndex = useCallback((clientY: number): number => {
+    const rects = itemRefs.current.map((el) => el?.getBoundingClientRect())
+    let best = 0
+    let bestDist = Infinity
+    rects.forEach((rect, i) => {
+      if (!rect) return
+      const mid = rect.top + rect.height / 2
+      const dist = Math.abs(clientY - mid)
+      if (dist < bestDist) { bestDist = dist; best = i }
+    })
+    return best
+  }, [])
 
-  const handleDragOver = (e: React.DragEvent, idx: number) => {
+  const handlePointerDown = useCallback((e: React.PointerEvent, idx: number) => {
     e.preventDefault()
-    setDragOver(idx)
-  }
+    dragIndexRef.current = idx
+    setDragging(idx)
 
-  const handleDrop = (idx: number) => {
-    if (dragItem.current === null || dragItem.current === idx) {
-      setDragOver(null)
-      return
+    const onMove = (ev: PointerEvent) => {
+      const target = getDropIndex(ev.clientY)
+      setDropTarget(target)
     }
-    const newOrder = [...sectionOrder]
-    const [moved] = newOrder.splice(dragItem.current, 1)
-    newOrder.splice(idx, 0, moved)
-    reorderSections(newOrder)
-    dragItem.current = null
-    setDragOver(null)
-  }
+
+    const onUp = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      const from = dragIndexRef.current
+      const to = getDropIndex(ev.clientY)
+      setDragging(null)
+      setDropTarget(null)
+      dragIndexRef.current = null
+      if (from !== null && from !== to) {
+        const newOrder = [...sectionOrderRef.current]
+        const [moved] = newOrder.splice(from, 1)
+        newOrder.splice(to, 0, moved)
+        reorderSections(newOrder)
+      }
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+  }, [getDropIndex, reorderSections])
 
   const moveUp = (idx: number) => {
     if (idx === 0) return
@@ -189,19 +214,24 @@ function SectionOrder() {
         {sectionOrder.map((id, idx) => (
           <div
             key={id}
-            draggable
-            onDragStart={() => handleDragStart(idx)}
-            onDragOver={(e) => handleDragOver(e, idx)}
-            onDrop={() => handleDrop(idx)}
-            onDragEnd={() => setDragOver(null)}
-            className={`flex items-center gap-2 px-3 md:px-2.5 py-2.5 md:py-1.5 rounded border bg-[var(--surface)] cursor-grab active:cursor-grabbing transition-all
-              ${dragOver === idx ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[var(--border)] hover:border-[var(--border-strong)]'}`}
+            ref={(el) => { itemRefs.current[idx] = el }}
+            className={`flex items-center gap-2 px-3 md:px-2.5 py-2.5 md:py-1.5 rounded border bg-[var(--surface)] transition-all select-none
+              ${dragging === idx ? 'opacity-40 scale-[0.97] border-[var(--border)]' :
+                dropTarget === idx && dragging !== null ? 'border-[var(--accent)] bg-[var(--accent)]/5 shadow-sm' :
+                'border-[var(--border)] hover:border-[var(--border-strong)]'}`}
           >
-            <svg aria-hidden="true" className="w-4 h-4 md:w-3.5 md:h-3.5 text-[var(--text-3)] shrink-0" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
-              <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
-              <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
-            </svg>
+            <div
+              onPointerDown={(e) => handlePointerDown(e, idx)}
+              aria-label="拖拽排序"
+              style={{ touchAction: 'none' }}
+              className="cursor-grab active:cursor-grabbing p-0.5 -ml-0.5 rounded hover:bg-[var(--bg)] transition-colors"
+            >
+              <svg aria-hidden="true" className="w-4 h-4 md:w-3.5 md:h-3.5 text-[var(--text-3)]" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+                <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+              </svg>
+            </div>
             <span className="text-[14px] md:text-[12px] font-medium flex-1">{SECTION_LABELS[id]}</span>
             <div className="flex gap-1 md:gap-0.5">
               <button
