@@ -1,8 +1,9 @@
-import { useDeferredValue, useRef, useEffect, useState } from 'react'
+import { useDeferredValue, useRef, useEffect, useState, lazy, Suspense } from 'react'
 import { useStore } from '../store'
-import ClassicTemplate from '../templates/Classic'
-import MinimalTemplate from '../templates/Minimal'
-import ModernTemplate from '../templates/Modern'
+
+const ClassicTemplate = lazy(() => import('../templates/Classic'))
+const MinimalTemplate = lazy(() => import('../templates/Minimal'))
+const ModernTemplate = lazy(() => import('../templates/Modern'))
 
 const A4_WIDTH_PX = 794
 
@@ -37,7 +38,9 @@ export default function PreviewPanel() {
         className="a4-page print-area shrink-0"
         style={pageZoom < 1 ? { zoom: pageZoom } : undefined}
       >
-        <TemplateComponent data={deferredData} />
+        <Suspense>
+          <TemplateComponent data={deferredData} />
+        </Suspense>
       </div>
     </main>
   )

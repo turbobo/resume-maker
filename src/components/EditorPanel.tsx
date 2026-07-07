@@ -1,4 +1,4 @@
-import { useState, useRef, memo } from 'react'
+import { useState, useRef, memo, useCallback } from 'react'
 import { useStore } from '../store'
 import type { Experience, Education, Project } from '../types'
 import { SECTION_LABELS } from '../types'
@@ -55,6 +55,7 @@ function ItemCard({ children, onRemove }: { children: React.ReactNode; onRemove:
     <div className="relative p-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] mb-2 group">
       <button
         onClick={onRemove}
+        aria-label="删除此项"
         className="absolute top-2 right-2 w-7 h-7 md:w-5 md:h-5 rounded flex items-center justify-center text-[11px] md:text-[10px] text-[var(--text-3)] hover:text-red-500 hover:bg-red-50 md:opacity-0 md:group-hover:opacity-100 transition-all"
       >
         ✕
@@ -64,61 +65,73 @@ function ItemCard({ children, onRemove }: { children: React.ReactNode; onRemove:
   )
 }
 
-const ExperienceCard = memo(function ExperienceCard({ item, onUpdate, onRemove }: {
-  item: Experience; onUpdate: (p: Partial<Experience>) => void; onRemove: () => void
+const ExperienceCard = memo(function ExperienceCard({ item }: {
+  item: Experience
 }) {
+  const updateExperience = useStore((s) => s.updateExperience)
+  const removeExperience = useStore((s) => s.removeExperience)
+  const onRemove = useCallback(() => removeExperience(item.id), [removeExperience, item.id])
+
   return (
     <ItemCard onRemove={onRemove}>
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">
-          <Input label="公司" value={item.company} onChange={(v) => onUpdate({ company: v })} placeholder="公司名称" />
-          <Input label="职位" value={item.title} onChange={(v) => onUpdate({ title: v })} placeholder="职位名称" />
+          <Input label="公司" value={item.company} onChange={(v) => updateExperience(item.id, { company: v })} placeholder="公司名称" />
+          <Input label="职位" value={item.title} onChange={(v) => updateExperience(item.id, { title: v })} placeholder="职位名称" />
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Input label="开始" value={item.startDate} onChange={(v) => onUpdate({ startDate: v })} placeholder="2021-03" />
-          <Input label="结束" value={item.endDate} onChange={(v) => onUpdate({ endDate: v })} placeholder="至今" />
+          <Input label="开始" value={item.startDate} onChange={(v) => updateExperience(item.id, { startDate: v })} placeholder="2021-03" />
+          <Input label="结束" value={item.endDate} onChange={(v) => updateExperience(item.id, { endDate: v })} placeholder="至今" />
         </div>
-        <TextArea label="工作内容" value={item.description} onChange={(v) => onUpdate({ description: v })} placeholder="描述主要职责和成果..." rows={2} />
+        <TextArea label="工作内容" value={item.description} onChange={(v) => updateExperience(item.id, { description: v })} placeholder="描述主要职责和成果..." rows={2} />
       </div>
     </ItemCard>
   )
 })
 
-const EducationCard = memo(function EducationCard({ item, onUpdate, onRemove }: {
-  item: Education; onUpdate: (p: Partial<Education>) => void; onRemove: () => void
+const EducationCard = memo(function EducationCard({ item }: {
+  item: Education
 }) {
+  const updateEducation = useStore((s) => s.updateEducation)
+  const removeEducation = useStore((s) => s.removeEducation)
+  const onRemove = useCallback(() => removeEducation(item.id), [removeEducation, item.id])
+
   return (
     <ItemCard onRemove={onRemove}>
       <div className="space-y-2">
-        <Input label="学校" value={item.school} onChange={(v) => onUpdate({ school: v })} placeholder="学校名称" />
+        <Input label="学校" value={item.school} onChange={(v) => updateEducation(item.id, { school: v })} placeholder="学校名称" />
         <div className="grid grid-cols-2 gap-2">
-          <Input label="学历" value={item.degree} onChange={(v) => onUpdate({ degree: v })} placeholder="本科" />
-          <Input label="专业" value={item.major} onChange={(v) => onUpdate({ major: v })} placeholder="专业名称" />
+          <Input label="学历" value={item.degree} onChange={(v) => updateEducation(item.id, { degree: v })} placeholder="本科" />
+          <Input label="专业" value={item.major} onChange={(v) => updateEducation(item.id, { major: v })} placeholder="专业名称" />
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Input label="开始" value={item.startDate} onChange={(v) => onUpdate({ startDate: v })} placeholder="2014-09" />
-          <Input label="结束" value={item.endDate} onChange={(v) => onUpdate({ endDate: v })} placeholder="2018-06" />
+          <Input label="开始" value={item.startDate} onChange={(v) => updateEducation(item.id, { startDate: v })} placeholder="2014-09" />
+          <Input label="结束" value={item.endDate} onChange={(v) => updateEducation(item.id, { endDate: v })} placeholder="2018-06" />
         </div>
       </div>
     </ItemCard>
   )
 })
 
-const ProjectCard = memo(function ProjectCard({ item, onUpdate, onRemove }: {
-  item: Project; onUpdate: (p: Partial<Project>) => void; onRemove: () => void
+const ProjectCard = memo(function ProjectCard({ item }: {
+  item: Project
 }) {
+  const updateProject = useStore((s) => s.updateProject)
+  const removeProject = useStore((s) => s.removeProject)
+  const onRemove = useCallback(() => removeProject(item.id), [removeProject, item.id])
+
   return (
     <ItemCard onRemove={onRemove}>
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">
-          <Input label="项目名" value={item.name} onChange={(v) => onUpdate({ name: v })} placeholder="项目名称" />
-          <Input label="角色" value={item.role} onChange={(v) => onUpdate({ role: v })} placeholder="技术负责人" />
+          <Input label="项目名" value={item.name} onChange={(v) => updateProject(item.id, { name: v })} placeholder="项目名称" />
+          <Input label="角色" value={item.role} onChange={(v) => updateProject(item.id, { role: v })} placeholder="技术负责人" />
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Input label="开始" value={item.startDate} onChange={(v) => onUpdate({ startDate: v })} placeholder="2022-01" />
-          <Input label="结束" value={item.endDate} onChange={(v) => onUpdate({ endDate: v })} placeholder="2023-06" />
+          <Input label="开始" value={item.startDate} onChange={(v) => updateProject(item.id, { startDate: v })} placeholder="2022-01" />
+          <Input label="结束" value={item.endDate} onChange={(v) => updateProject(item.id, { endDate: v })} placeholder="2023-06" />
         </div>
-        <TextArea label="项目描述" value={item.description} onChange={(v) => onUpdate({ description: v })} placeholder="描述项目内容和你的贡献..." rows={2} />
+        <TextArea label="项目描述" value={item.description} onChange={(v) => updateProject(item.id, { description: v })} placeholder="描述项目内容和你的贡献..." rows={2} />
       </div>
     </ItemCard>
   )
@@ -184,7 +197,7 @@ function SectionOrder() {
             className={`flex items-center gap-2 px-2.5 py-1.5 rounded border bg-[var(--surface)] cursor-grab active:cursor-grabbing transition-all
               ${dragOver === idx ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[var(--border)] hover:border-[var(--border-strong)]'}`}
           >
-            <svg className="w-3.5 h-3.5 text-[var(--text-3)] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <svg aria-hidden="true" className="w-3.5 h-3.5 text-[var(--text-3)] shrink-0" viewBox="0 0 24 24" fill="currentColor">
               <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
               <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
               <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
@@ -194,6 +207,7 @@ function SectionOrder() {
               <button
                 onClick={() => moveUp(idx)}
                 disabled={idx === 0}
+                aria-label={`上移${SECTION_LABELS[id]}`}
                 className="w-5 h-5 rounded flex items-center justify-center text-[10px] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-30 transition-colors"
               >
                 ↑
@@ -201,6 +215,7 @@ function SectionOrder() {
               <button
                 onClick={() => moveDown(idx)}
                 disabled={idx === sectionOrder.length - 1}
+                aria-label={`下移${SECTION_LABELS[id]}`}
                 className="w-5 h-5 rounded flex items-center justify-center text-[10px] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-30 transition-colors"
               >
                 ↓
@@ -270,14 +285,12 @@ function SkillsEditorSection() {
 function ExperiencesSection() {
   const experiences = useStore((s) => s.data.experiences)
   const addExperience = useStore((s) => s.addExperience)
-  const updateExperience = useStore((s) => s.updateExperience)
-  const removeExperience = useStore((s) => s.removeExperience)
 
   return (
     <section>
       <SectionHeader title="工作经历" onAdd={addExperience} />
       {experiences.map((exp) => (
-        <ExperienceCard key={exp.id} item={exp} onUpdate={(p) => updateExperience(exp.id, p)} onRemove={() => removeExperience(exp.id)} />
+        <ExperienceCard key={exp.id} item={exp} />
       ))}
     </section>
   )
@@ -286,14 +299,12 @@ function ExperiencesSection() {
 function EducationEditorSection() {
   const education = useStore((s) => s.data.education)
   const addEducation = useStore((s) => s.addEducation)
-  const updateEducation = useStore((s) => s.updateEducation)
-  const removeEducation = useStore((s) => s.removeEducation)
 
   return (
     <section>
       <SectionHeader title="教育背景" onAdd={addEducation} />
       {education.map((edu) => (
-        <EducationCard key={edu.id} item={edu} onUpdate={(p) => updateEducation(edu.id, p)} onRemove={() => removeEducation(edu.id)} />
+        <EducationCard key={edu.id} item={edu} />
       ))}
     </section>
   )
@@ -302,14 +313,12 @@ function EducationEditorSection() {
 function ProjectsSection() {
   const projects = useStore((s) => s.data.projects)
   const addProject = useStore((s) => s.addProject)
-  const updateProject = useStore((s) => s.updateProject)
-  const removeProject = useStore((s) => s.removeProject)
 
   return (
     <section>
       <SectionHeader title="项目经历" onAdd={addProject} />
       {projects.map((proj) => (
-        <ProjectCard key={proj.id} item={proj} onUpdate={(p) => updateProject(proj.id, p)} onRemove={() => removeProject(proj.id)} />
+        <ProjectCard key={proj.id} item={proj} />
       ))}
     </section>
   )

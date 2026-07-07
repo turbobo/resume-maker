@@ -8,7 +8,6 @@ interface SectionProps {
   bodyFamily: string
 }
 
-// ─── Shared section header ───
 function SectionTitle({ children, headingFamily, variant = 'line' }: {
   children: React.ReactNode; headingFamily: string; variant?: 'line' | 'plain' | 'bold'
 }) {
@@ -33,19 +32,17 @@ function SectionTitle({ children, headingFamily, variant = 'line' }: {
   )
 }
 
-// ─── Summary ───
-export function SummarySection({ data, headingFamily, bodyFamily, variant = 'default' }: SectionProps & { variant?: 'default' | 'plain' }) {
+export function SummarySection({ data, headingFamily, variant = 'default' }: SectionProps & { variant?: 'default' | 'plain' }) {
   if (!data.summary) return null
   return (
     <section className="mb-2.5">
-      {variant !== 'plain' && <SectionTitle headingFamily={headingFamily}>个人简介</SectionTitle>}
-      <p style={{ fontFamily: bodyFamily }} className="text-[8.5pt] text-[#57534e] leading-[1.55]">{data.summary}</p>
+      {variant !== 'plain' && <SectionTitle headingFamily={headingFamily}>{SECTION_LABELS.summary}</SectionTitle>}
+      <p className="text-[8.5pt] text-[#57534e] leading-[1.55]">{data.summary}</p>
     </section>
   )
 }
 
-// ─── Experience ───
-export function ExperienceSection({ data, headingFamily, bodyFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
+export function ExperienceSection({ data, headingFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
   if (data.experiences.length === 0) return null
   return (
     <section className="mb-2.5">
@@ -55,12 +52,12 @@ export function ExperienceSection({ data, headingFamily, bodyFamily, variant = '
           <div className="flex items-baseline justify-between mb-0.5">
             <div className="flex items-baseline gap-2">
               <span style={{ fontFamily: headingFamily }} className="font-bold text-[9.5pt]">{exp.company}</span>
-              <span style={{ fontFamily: bodyFamily }} className="text-[8.5pt] text-[#57534e]">{exp.title}</span>
+              <span className="text-[8.5pt] text-[#57534e]">{exp.title}</span>
             </div>
-            <span style={{ fontFamily: bodyFamily }} className="text-[8pt] text-[#a8a29e] shrink-0">{exp.startDate} — {exp.endDate}</span>
+            <span className="text-[8pt] text-[#a8a29e] shrink-0">{exp.startDate} — {exp.endDate}</span>
           </div>
           {exp.description && (
-            <p style={{ fontFamily: bodyFamily }} className="text-[8.5pt] text-[#57534e] leading-[1.5]">{exp.description}</p>
+            <p className="text-[8.5pt] text-[#57534e] leading-[1.5]">{exp.description}</p>
           )}
         </div>
       ))}
@@ -68,8 +65,7 @@ export function ExperienceSection({ data, headingFamily, bodyFamily, variant = '
   )
 }
 
-// ─── Projects ───
-export function ProjectSection({ data, headingFamily, bodyFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
+export function ProjectSection({ data, headingFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
   if (data.projects.length === 0) return null
   return (
     <section className="mb-2.5">
@@ -79,12 +75,12 @@ export function ProjectSection({ data, headingFamily, bodyFamily, variant = 'lin
           <div className="flex items-baseline justify-between mb-0.5">
             <div className="flex items-baseline gap-2">
               <span style={{ fontFamily: headingFamily }} className="font-bold text-[9.5pt]">{proj.name}</span>
-              <span style={{ fontFamily: bodyFamily }} className="text-[8.5pt] text-[#57534e]">{proj.role}</span>
+              <span className="text-[8.5pt] text-[#57534e]">{proj.role}</span>
             </div>
-            <span style={{ fontFamily: bodyFamily }} className="text-[8pt] text-[#a8a29e] shrink-0">{proj.startDate} — {proj.endDate}</span>
+            <span className="text-[8pt] text-[#a8a29e] shrink-0">{proj.startDate} — {proj.endDate}</span>
           </div>
           {proj.description && (
-            <p style={{ fontFamily: bodyFamily }} className="text-[8.5pt] text-[#57534e] leading-[1.5]">{proj.description}</p>
+            <p className="text-[8.5pt] text-[#57534e] leading-[1.5]">{proj.description}</p>
           )}
         </div>
       ))}
@@ -92,8 +88,7 @@ export function ProjectSection({ data, headingFamily, bodyFamily, variant = 'lin
   )
 }
 
-// ─── Education ───
-export function EducationSection({ data, headingFamily, bodyFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
+export function EducationSection({ data, headingFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
   if (data.education.length === 0) return null
   return (
     <section className="mb-2.5">
@@ -102,17 +97,16 @@ export function EducationSection({ data, headingFamily, bodyFamily, variant = 'l
         <div key={edu.id} className="flex items-baseline justify-between mb-0.5">
           <div className="flex items-baseline gap-2">
             <span style={{ fontFamily: headingFamily }} className="font-bold text-[9.5pt]">{edu.school}</span>
-            <span style={{ fontFamily: bodyFamily }} className="text-[8.5pt] text-[#57534e]">{edu.degree} · {edu.major}</span>
+            <span className="text-[8.5pt] text-[#57534e]">{edu.degree} · {edu.major}</span>
           </div>
-          <span style={{ fontFamily: bodyFamily }} className="text-[8pt] text-[#a8a29e] shrink-0">{edu.startDate} — {edu.endDate}</span>
+          <span className="text-[8pt] text-[#a8a29e] shrink-0">{edu.startDate} — {edu.endDate}</span>
         </div>
       ))}
     </section>
   )
 }
 
-// ─── Skills ───
-export function SkillsSection({ data, headingFamily, bodyFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
+export function SkillsSection({ data, headingFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
   const skills = useMemo(() => data.skills.split(',').map((s) => s.trim()).filter(Boolean), [data.skills])
   if (skills.length === 0) return null
   return (
@@ -120,7 +114,7 @@ export function SkillsSection({ data, headingFamily, bodyFamily, variant = 'line
       <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.skills}</SectionTitle>
       <div className="flex flex-wrap gap-1">
         {skills.map((skill, i) => (
-          <span key={i} style={{ fontFamily: bodyFamily }} className="text-[8.5pt] text-[#57534e] bg-[#f5f5f4] px-1.5 py-0.5 rounded">
+          <span key={i} className="text-[8.5pt] text-[#57534e] bg-[#f5f5f4] px-1.5 py-0.5 rounded">
             {skill}
           </span>
         ))}
@@ -129,8 +123,7 @@ export function SkillsSection({ data, headingFamily, bodyFamily, variant = 'line
   )
 }
 
-// ─── Skills (list variant for sidebar) ───
-export function SkillsListSection({ data, headingFamily, bodyFamily, variant = 'plain' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
+export function SkillsListSection({ data, headingFamily, variant = 'plain' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
   const skills = useMemo(() => data.skills.split(',').map((s) => s.trim()).filter(Boolean), [data.skills])
   if (skills.length === 0) return null
   return (
@@ -138,15 +131,14 @@ export function SkillsListSection({ data, headingFamily, bodyFamily, variant = '
       <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.skills}</SectionTitle>
       <div className="space-y-0.5">
         {skills.map((skill, i) => (
-          <p key={i} style={{ fontFamily: bodyFamily }} className="text-[8pt] text-[#57534e] leading-[1.4]">{skill}</p>
+          <p key={i} className="text-[8pt] text-[#57534e] leading-[1.4]">{skill}</p>
         ))}
       </div>
     </section>
   )
 }
 
-// ─── Education (compact variant for sidebar) ───
-export function EducationCompactSection({ data, headingFamily, bodyFamily, variant = 'plain' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
+export function EducationCompactSection({ data, headingFamily, variant = 'plain' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
   if (data.education.length === 0) return null
   return (
     <section>
@@ -154,47 +146,45 @@ export function EducationCompactSection({ data, headingFamily, bodyFamily, varia
       {data.education.map((edu) => (
         <div key={edu.id} className="mb-1.5">
           <p style={{ fontFamily: headingFamily }} className="font-semibold text-[8.5pt] leading-tight">{edu.school}</p>
-          <p style={{ fontFamily: bodyFamily }} className="text-[7.5pt] text-[#57534e]">{edu.degree} · {edu.major}</p>
-          <p style={{ fontFamily: bodyFamily }} className="text-[7pt] text-[#a8a29e]">{edu.startDate} — {edu.endDate}</p>
+          <p className="text-[7.5pt] text-[#57534e]">{edu.degree} · {edu.major}</p>
+          <p className="text-[7pt] text-[#a8a29e]">{edu.startDate} — {edu.endDate}</p>
         </div>
       ))}
     </section>
   )
 }
 
-// ─── Modern sidebar variants (dark theme) ───
-export function SkillsDarkSection({ data, headingFamily, bodyFamily }: SectionProps) {
+export function SkillsDarkSection({ data, headingFamily }: SectionProps) {
   const skills = useMemo(() => data.skills.split(',').map((s) => s.trim()).filter(Boolean), [data.skills])
   if (skills.length === 0) return null
   return (
     <section>
-      <h2 style={{ fontFamily: headingFamily }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5">技能</h2>
+      <h2 style={{ fontFamily: headingFamily }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5">{SECTION_LABELS.skills}</h2>
       <div className="space-y-0.5">
         {skills.map((skill, i) => (
-          <p key={i} style={{ fontFamily: bodyFamily }} className="text-[8pt] text-[#d6d3d1] leading-[1.4]">{skill}</p>
+          <p key={i} className="text-[8pt] text-[#d6d3d1] leading-[1.4]">{skill}</p>
         ))}
       </div>
     </section>
   )
 }
 
-export function EducationDarkSection({ data, headingFamily, bodyFamily }: SectionProps) {
+export function EducationDarkSection({ data, headingFamily }: SectionProps) {
   if (data.education.length === 0) return null
   return (
     <section>
-      <h2 style={{ fontFamily: headingFamily }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5">教育</h2>
+      <h2 style={{ fontFamily: headingFamily }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5">{SECTION_LABELS.education}</h2>
       {data.education.map((edu) => (
         <div key={edu.id} className="mb-1.5">
           <p style={{ fontFamily: headingFamily }} className="font-semibold text-[8.5pt] leading-tight text-white">{edu.school}</p>
-          <p style={{ fontFamily: bodyFamily }} className="text-[7.5pt] text-[#a8a29e]">{edu.degree} · {edu.major}</p>
-          <p style={{ fontFamily: bodyFamily }} className="text-[7pt] text-[#78716c]">{edu.startDate} — {edu.endDate}</p>
+          <p className="text-[7.5pt] text-[#a8a29e]">{edu.degree} · {edu.major}</p>
+          <p className="text-[7pt] text-[#78716c]">{edu.startDate} — {edu.endDate}</p>
         </div>
       ))}
     </section>
   )
 }
 
-// ─── Render a section by ID ───
 export function renderSection(
   id: SectionId,
   props: SectionProps,

@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react'
 import { useStore } from '../store'
 import type { TemplateId } from '../types'
 import { FONT_OPTIONS } from '../types'
+import { useResumeActions } from '../hooks/useResumeActions'
 
 const TEMPLATES: { id: TemplateId; label: string }[] = [
   { id: 'classic', label: '经典' },
@@ -14,14 +15,14 @@ export default function TopBar() {
   const setTemplate = useStore((s) => s.setTemplate)
   const headingFont = useStore((s) => s.data.headingFont)
   const bodyFont = useStore((s) => s.data.bodyFont)
-  const importData = useStore((s) => s.importData)
   const setHeadingFont = useStore((s) => s.setHeadingFont)
   const setBodyFont = useStore((s) => s.setBodyFont)
   const fileRef = useRef<HTMLInputElement>(null)
+  const { handleImport, handleExportDocx, handleExportPdf } = useResumeActions()
 
   useEffect(() => {
-    const ids = new Set([headingFont, bodyFont])
-    ids.forEach((id) => {
+    const activeIds = new Set([headingFont, bodyFont])
+    activeIds.forEach((id) => {
       const font = FONT_OPTIONS.find((f) => f.id === id)
       if (font?.import) {
         const linkId = `gf-${id}`
@@ -34,38 +35,18 @@ export default function TopBar() {
         }
       }
     })
+    document.querySelectorAll('link[id^="gf-"]').forEach((el) => {
+      const fontId = el.id.replace('gf-', '')
+      if (!activeIds.has(fontId)) el.remove()
+    })
   }, [headingFont, bodyFont])
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    try {
-      const { importWordFile } = await import('../utils/importWord')
-      const parsed = await importWordFile(file)
-      importData(parsed)
-    } catch (err) {
-      console.error('Import failed:', err)
-      alert('导入失败，请检查文件格式')
-    }
-    e.target.value = ''
-  }
-
-  const handleExportDocx = async () => {
-    const { exportDocx } = await import('../utils/exportDocx')
-    exportDocx(useStore.getState().data)
-  }
-
-  const handleExportPdf = async () => {
-    const { exportPdf } = await import('../utils/exportPdf')
-    exportPdf()
-  }
 
   return (
     <header className="h-12 shrink-0 flex items-center justify-between px-3 md:px-4 border-b border-[var(--border)] bg-[var(--surface)] overflow-hidden">
       {/* Left: Brand + Template */}
       <div className="flex items-center gap-2 md:gap-3 min-w-0">
         <div className="flex items-center gap-1.5 shrink-0">
-          <svg className="hidden md:block" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" className="hidden md:block" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
             <line x1="16" y1="13" x2="8" y2="13"/>
@@ -94,8 +75,9 @@ export default function TopBar() {
         {/* Font selectors — desktop only */}
         <span className="hidden md:inline text-[var(--border-strong)]">|</span>
         <div className="hidden md:flex items-center gap-1.5">
-          <label className="text-[10px] text-[var(--text-3)]">标题</label>
+          <label htmlFor="heading-font-select" className="text-[10px] text-[var(--text-3)]">标题</label>
           <select
+            id="heading-font-select"
             value={headingFont}
             onChange={(e) => setHeadingFont(e.target.value)}
             className="px-1.5 py-1 rounded border border-[var(--border)] text-[11px] bg-[var(--surface)] cursor-pointer"
@@ -104,8 +86,9 @@ export default function TopBar() {
               <option key={f.id} value={f.id}>{f.label}</option>
             ))}
           </select>
-          <label className="text-[10px] text-[var(--text-3)]">正文</label>
+          <label htmlFor="body-font-select" className="text-[10px] text-[var(--text-3)]">正文</label>
           <select
+            id="body-font-select"
             value={bodyFont}
             onChange={(e) => setBodyFont(e.target.value)}
             className="px-1.5 py-1 rounded border border-[var(--border)] text-[11px] bg-[var(--surface)] cursor-pointer"

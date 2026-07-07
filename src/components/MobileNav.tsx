@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useStore } from '../store'
 import { FONT_OPTIONS } from '../types'
+import { useResumeActions } from '../hooks/useResumeActions'
 
 interface Props {
   activeView: 'editor' | 'preview'
@@ -17,6 +18,9 @@ function BottomSheet({ open, onClose, title, children }: {
         onClick={onClose}
       />
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         className={`absolute inset-x-0 bottom-0 bg-[var(--surface)] rounded-t-2xl transition-transform duration-300 ease-out ${open ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
@@ -38,33 +42,17 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
   const bodyFont = useStore((s) => s.data.bodyFont)
   const setHeadingFont = useStore((s) => s.setHeadingFont)
   const setBodyFont = useStore((s) => s.setBodyFont)
-  const importData = useStore((s) => s.importData)
   const fileRef = useRef<HTMLInputElement>(null)
+  const { handleImport, handleExportDocx: exportDocx, handleExportPdf: exportPdf } = useResumeActions()
 
   const handleExportPdf = async () => {
     setSheet(null)
-    const { exportPdf } = await import('../utils/exportPdf')
-    exportPdf()
+    await exportPdf()
   }
 
   const handleExportDocx = async () => {
     setSheet(null)
-    const { exportDocx } = await import('../utils/exportDocx')
-    exportDocx(useStore.getState().data)
-  }
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    try {
-      const { importWordFile } = await import('../utils/importWord')
-      const parsed = await importWordFile(file)
-      importData(parsed)
-    } catch {
-      alert('导入失败，请检查文件格式')
-    }
-    e.target.value = ''
-    setSheet(null)
+    await exportDocx()
   }
 
   return (
@@ -76,7 +64,7 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
             activeView === 'editor' ? 'text-[var(--accent)]' : 'text-[var(--text-3)]'
           }`}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeView === 'editor' ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeView === 'editor' ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
@@ -89,7 +77,7 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
             activeView === 'preview' ? 'text-[var(--accent)]' : 'text-[var(--text-3)]'
           }`}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeView === 'preview' ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeView === 'preview' ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
@@ -100,7 +88,7 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
           onClick={() => setSheet('export')}
           className="flex flex-col items-center gap-0.5 py-1 px-4 min-w-[60px] text-[var(--text-3)] transition-colors"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -112,7 +100,7 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
           onClick={() => setSheet('settings')}
           className="flex flex-col items-center gap-0.5 py-1 px-4 min-w-[60px] text-[var(--text-3)] transition-colors"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
             <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
             <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
@@ -160,8 +148,9 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
       <BottomSheet open={sheet === 'settings'} onClose={() => setSheet(null)} title="设置">
         <div className="space-y-5">
           <div>
-            <label className="text-[12px] font-medium text-[var(--text-2)] mb-2 block">标题字体</label>
+            <label htmlFor="mobile-heading-font" className="text-[12px] font-medium text-[var(--text-2)] mb-2 block">标题字体</label>
             <select
+              id="mobile-heading-font"
               value={headingFont}
               onChange={(e) => setHeadingFont(e.target.value)}
               className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)] text-[14px] bg-[var(--surface)] appearance-none"
@@ -172,8 +161,9 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
             </select>
           </div>
           <div>
-            <label className="text-[12px] font-medium text-[var(--text-2)] mb-2 block">正文字体</label>
+            <label htmlFor="mobile-body-font" className="text-[12px] font-medium text-[var(--text-2)] mb-2 block">正文字体</label>
             <select
+              id="mobile-body-font"
               value={bodyFont}
               onChange={(e) => setBodyFont(e.target.value)}
               className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)] text-[14px] bg-[var(--surface)] appearance-none"

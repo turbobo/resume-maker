@@ -1,10 +1,10 @@
 import type { ResumeData } from '../types'
-import { FONT_OPTIONS } from '../types'
+import { resolveFontFamily } from '../types'
 import { renderSection } from './ResumeSections'
 
 export default function ClassicTemplate({ data }: { data: ResumeData }) {
-  const headingFont = FONT_OPTIONS.find((f) => f.id === data.headingFont)?.family || FONT_OPTIONS[0].family
-  const bodyFont = FONT_OPTIONS.find((f) => f.id === data.bodyFont)?.family || FONT_OPTIONS[0].family
+  const headingFont = resolveFontFamily(data.headingFont)
+  const bodyFont = resolveFontFamily(data.bodyFont)
 
   return (
     <div style={{ fontFamily: bodyFont }} className="p-[14mm] text-[9.5pt] leading-[1.5] text-[#1c1917]">

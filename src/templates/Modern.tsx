@@ -1,12 +1,10 @@
 import type { ResumeData } from '../types'
-import { FONT_OPTIONS } from '../types'
+import { resolveFontFamily, SIDEBAR_SECTIONS } from '../types'
 import { renderSection, SkillsDarkSection, EducationDarkSection } from './ResumeSections'
 
 export default function ModernTemplate({ data }: { data: ResumeData }) {
-  const headingFont = FONT_OPTIONS.find((f) => f.id === data.headingFont)?.family || FONT_OPTIONS[0].family
-  const bodyFont = FONT_OPTIONS.find((f) => f.id === data.bodyFont)?.family || FONT_OPTIONS[0].family
-
-  const sidebarSections = new Set(['education', 'skills'])
+  const headingFont = resolveFontFamily(data.headingFont)
+  const bodyFont = resolveFontFamily(data.bodyFont)
 
   return (
     <div style={{ fontFamily: bodyFont }} className="flex text-[9.5pt] leading-[1.5] text-[#1c1917]">
@@ -27,7 +25,7 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
         </div>
 
         {/* Sidebar sections in order */}
-        {data.sectionOrder.filter((id) => sidebarSections.has(id)).map((id) => (
+        {data.sectionOrder.filter((id) => SIDEBAR_SECTIONS.has(id)).map((id) => (
           <div key={id}>
             {id === 'skills' && <SkillsDarkSection data={data} headingFamily={headingFont} bodyFamily={bodyFont} />}
             {id === 'education' && <EducationDarkSection data={data} headingFamily={headingFont} bodyFamily={bodyFont} />}
@@ -40,7 +38,7 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
         {data.summary && (
           <p className="text-[9pt] text-[#57534e] leading-[1.6]">{data.summary}</p>
         )}
-        {data.sectionOrder.filter((id) => !sidebarSections.has(id) && id !== 'summary').map((id) => (
+        {data.sectionOrder.filter((id) => !SIDEBAR_SECTIONS.has(id) && id !== 'summary').map((id) => (
           <div key={id}>{renderSection(id, { data, headingFamily: headingFont, bodyFamily: bodyFont }, 'modern')}</div>
         ))}
       </div>

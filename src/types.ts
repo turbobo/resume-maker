@@ -125,3 +125,9 @@ export const DEFAULT_RESUME: ResumeData = {
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 10)
+
+export function resolveFontFamily(fontId: string): string {
+  return FONT_OPTIONS.find((f) => f.id === fontId)?.family || FONT_OPTIONS[0].family
+}
+
+export const SIDEBAR_SECTIONS = new Set<SectionId>(['education', 'skills'])

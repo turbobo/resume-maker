@@ -3,6 +3,7 @@ import EditorPanel from './components/EditorPanel'
 import PreviewPanel from './components/PreviewPanel'
 import TopBar from './components/TopBar'
 import MobileNav from './components/MobileNav'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
@@ -24,7 +25,7 @@ export default function App() {
       <TopBar />
       <div className="flex-1 flex min-h-0">
         {(isDesktop || mobileView === 'editor') && <EditorPanel />}
-        {(isDesktop || mobileView === 'preview') && <PreviewPanel />}
+        {(isDesktop || mobileView === 'preview') && <ErrorBoundary><PreviewPanel /></ErrorBoundary>}
       </div>
       {!isDesktop && (
         <MobileNav activeView={mobileView} onChangeView={setMobileView} />
