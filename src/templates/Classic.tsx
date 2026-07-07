@@ -10,15 +10,25 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
     <div style={{ fontFamily: bodyFont }} className="p-[14mm] text-[9.5pt] leading-[1.5] text-[#1c1917]">
       {/* Header */}
       <SectionHighlight sectionId="basic">
-        <div className="text-center mb-4 pb-3 border-b-2 border-[#1c1917]">
-          <h1 style={{ fontFamily: headingFont }} className="text-[20pt] font-bold tracking-[0.05em] mb-1">{data.name}</h1>
-          <p className="text-[10pt] text-[#57534e] mb-1">{data.title}</p>
-          <div className="flex items-center justify-center gap-3 text-[8.5pt] text-[#57534e]">
-            {data.email && <span>{data.email}</span>}
-            {data.phone && <><span className="text-[#d6d3d1]">|</span><span>{data.phone}</span></>}
-            {data.location && <><span className="text-[#d6d3d1]">|</span><span>{data.location}</span></>}
-            {data.website && <><span className="text-[#d6d3d1]">|</span><span>{data.website}</span></>}
+        <div className="flex items-center mb-4 pb-3 border-b-2 border-[#1c1917]">
+          {data.photo && <div className="w-[20mm] shrink-0" aria-hidden="true" />}
+          <div className="flex-1 text-center min-w-0">
+            <h1 style={{ fontFamily: headingFont }} className="text-[20pt] font-bold tracking-[0.05em] mb-1">{data.name}</h1>
+            <p className="text-[10pt] text-[#57534e] mb-1">{data.title}</p>
+            <div className="flex items-center justify-center gap-3 text-[8.5pt] text-[#57534e]">
+              {data.email && <span>{data.email}</span>}
+              {data.phone && <><span className="text-[#d6d3d1]">|</span><span>{data.phone}</span></>}
+              {data.location && <><span className="text-[#d6d3d1]">|</span><span>{data.location}</span></>}
+              {data.website && <><span className="text-[#d6d3d1]">|</span><span>{data.website}</span></>}
+            </div>
           </div>
+          {data.photo && (
+            <img
+              src={data.photo}
+              alt=""
+              className="w-[20mm] h-[28mm] rounded object-cover shrink-0 border border-[#e7e5e4]"
+            />
+          )}
         </div>
       </SectionHighlight>
 

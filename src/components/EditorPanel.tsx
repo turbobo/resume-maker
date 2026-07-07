@@ -424,31 +424,46 @@ function BasicInfoSection() {
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)]">基本信息</h3>
       </div>
-      <div className="flex gap-3 mb-2">
-        <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
-        <button
-          onClick={() => photoRef.current?.click()}
-          className="shrink-0 w-16 h-16 md:w-14 md:h-14 rounded-lg border border-dashed border-[var(--border-strong)] bg-[var(--surface)] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[var(--accent)] transition-colors group"
-        >
-          {photo ? (
-            <img src={photo} alt="照片" className="w-full h-full object-cover" />
-          ) : (
-            <div className="text-center">
-              <svg aria-hidden="true" className="w-5 h-5 text-[var(--text-3)] group-hover:text-[var(--text-2)] mx-auto mb-0.5 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
-              </svg>
-              <span className="text-[9px] text-[var(--text-3)]">照片</span>
-            </div>
-          )}
-        </button>
-        {photo && (
+      <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+      {/* Photo upload — stacked on mobile, inline on desktop */}
+      <div className="flex flex-col md:flex-row gap-3 mb-2">
+        <div className="flex items-center gap-3 md:block">
           <button
-            onClick={() => setPhoto('')}
-            className="self-start text-[11px] text-[var(--text-3)] hover:text-red-500 transition-colors"
+            onClick={() => photoRef.current?.click()}
+            className="relative shrink-0 w-[52px] h-[72px] md:w-10 md:h-14 rounded border-2 border-dashed border-[var(--border-strong)] bg-[var(--surface)] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[var(--accent)] transition-colors group"
           >
-            移除
+            {photo ? (
+              <img src={photo} alt="照片" className="w-full h-full object-cover" />
+            ) : (
+              <div className="text-center">
+                <svg aria-hidden="true" className="w-6 h-6 md:w-5 md:h-5 text-[var(--text-3)] group-hover:text-[var(--text-2)] mx-auto transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+                </svg>
+              </div>
+            )}
           </button>
-        )}
+          <div className="flex flex-col gap-1 md:hidden">
+            <span className="text-[13px] font-medium text-[var(--text-2)]">{photo ? '点击更换照片' : '上传证件照'}</span>
+            {photo ? (
+              <button
+                onClick={() => setPhoto('')}
+                className="text-[12px] text-red-400 hover:text-red-500 text-left transition-colors"
+              >
+                移除照片
+              </button>
+            ) : (
+              <span className="text-[11px] text-[var(--text-3)]">支持 JPG / PNG</span>
+            )}
+          </div>
+          {photo && (
+            <button
+              onClick={() => setPhoto('')}
+              className="hidden md:block text-[10px] text-center text-[var(--text-3)] hover:text-red-500 mt-1 transition-colors"
+            >
+              移除
+            </button>
+          )}
+        </div>
         <div className="flex-1 grid grid-cols-2 gap-2">
           <Input label="姓名" value={name} onChange={(v) => update({ name: v })} placeholder="张三" onFocus={onFocus} onBlur={onBlur} />
           <Input label="职位" value={title} onChange={(v) => update({ title: v })} placeholder="前端工程师" onFocus={onFocus} onBlur={onBlur} />

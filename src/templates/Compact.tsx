@@ -45,7 +45,7 @@ export default function CompactTemplate({ data }: { data: ResumeData }) {
             <img
               src={data.photo}
               alt=""
-              className="w-[22mm] h-[28mm] object-cover rounded shrink-0 border border-[#e7e5e4]"
+              className="w-[22mm] h-[30mm] object-cover rounded shrink-0 border border-[#e7e5e4]"
             />
           )}
         </div>

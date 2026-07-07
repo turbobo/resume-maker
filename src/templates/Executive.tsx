@@ -19,7 +19,7 @@ export default function ExecutiveTemplate({ data }: { data: ResumeData }) {
               <img
                 src={data.photo}
                 alt=""
-                className="w-[26mm] h-[26mm] rounded-full object-cover mx-auto mb-2 border-2 border-white shadow-sm"
+                className="w-[24mm] h-[33mm] rounded object-cover mx-auto mb-2 border-2 border-white shadow-sm"
               />
             )}
             <h1 style={{ fontFamily: headingFont }} className="text-[14pt] font-bold leading-tight">{data.name}</h1>

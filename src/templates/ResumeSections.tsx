@@ -135,7 +135,7 @@ export function EducationSection({ data, headingFamily, variant = 'line' }: Sect
   )
 }
 
-export function SkillsSection({ data, headingFamily, variant = 'line' }: SectionProps & { variant?: 'line' | 'plain' | 'bold' }) {
+export function SkillsSection({ data, headingFamily, variant = 'line', chipBg = true }: SectionProps & { variant?: 'line' | 'plain' | 'bold'; chipBg?: boolean }) {
   const skills = useMemo(() => data.skills.split(',').map((s) => s.trim()).filter(Boolean), [data.skills])
   if (skills.length === 0) return null
   return (
@@ -144,7 +144,7 @@ export function SkillsSection({ data, headingFamily, variant = 'line' }: Section
         <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.skills}</SectionTitle>
         <div className="flex flex-wrap gap-1.5">
           {skills.map((skill, i) => (
-            <span key={i} className="inline-flex items-center text-[8.5pt] leading-none text-[#57534e] bg-[#f5f5f4] px-2 py-1 rounded">
+            <span key={i} className={`inline-flex items-center text-[8.5pt] leading-none text-[#57534e] px-2 py-1 rounded ${chipBg ? 'bg-[#f5f5f4]' : ''}`}>
               {skill}
             </span>
           ))}
@@ -245,7 +245,7 @@ export function renderSection(
       return <EducationSection {...props} variant={template === 'modern' ? 'bold' : 'line'} />
     case 'skills':
       if (template === 'minimal') return <SkillsListSection {...props} variant="plain" />
-      return <SkillsSection {...props} variant={template === 'modern' ? 'bold' : 'line'} />
+      return <SkillsSection {...props} variant={template === 'modern' ? 'bold' : 'line'} chipBg={template !== 'classic'} />
     default:
       return null
   }
