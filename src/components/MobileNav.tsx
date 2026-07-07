@@ -43,7 +43,7 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
   const setHeadingFont = useStore((s) => s.setHeadingFont)
   const setBodyFont = useStore((s) => s.setBodyFont)
   const fileRef = useRef<HTMLInputElement>(null)
-  const { handleImport, handleExportDocx: exportDocx, handleExportPdf: exportPdf } = useResumeActions()
+  const { handleImport, handleExportDocx: exportDocx, handleExportPdf: exportPdf, loading } = useResumeActions()
 
   const handleExportPdf = async () => {
     setSheet(null)
@@ -57,50 +57,50 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
 
   return (
     <>
-      <nav className="shrink-0 flex items-end justify-around border-t border-[var(--border)] bg-[var(--surface)] px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <nav className="shrink-0 flex items-end justify-around border-t border-[var(--border)] bg-[var(--surface)] px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         <button
           onClick={() => onChangeView('editor')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-4 min-w-[60px] transition-colors ${
+          className={`flex flex-col items-center gap-1 py-1.5 px-4 min-w-[64px] transition-colors ${
             activeView === 'editor' ? 'text-[var(--accent)]' : 'text-[var(--text-3)]'
           }`}
         >
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeView === 'editor' ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeView === 'editor' ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
-          <span className="text-[10px] font-medium">编辑</span>
+          <span className="text-[11px] font-medium">编辑</span>
         </button>
 
         <button
           onClick={() => onChangeView('preview')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-4 min-w-[60px] transition-colors ${
+          className={`flex flex-col items-center gap-1 py-1.5 px-4 min-w-[64px] transition-colors ${
             activeView === 'preview' ? 'text-[var(--accent)]' : 'text-[var(--text-3)]'
           }`}
         >
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeView === 'preview' ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeView === 'preview' ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
-          <span className="text-[10px] font-medium">预览</span>
+          <span className="text-[11px] font-medium">预览</span>
         </button>
 
         <button
           onClick={() => setSheet('export')}
-          className="flex flex-col items-center gap-0.5 py-1 px-4 min-w-[60px] text-[var(--text-3)] transition-colors"
+          className="flex flex-col items-center gap-1 py-1.5 px-4 min-w-[64px] text-[var(--text-3)] transition-colors"
         >
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          <span className="text-[10px] font-medium">导出</span>
+          <span className="text-[11px] font-medium">导出</span>
         </button>
 
         <button
           onClick={() => setSheet('settings')}
-          className="flex flex-col items-center gap-0.5 py-1 px-4 min-w-[60px] text-[var(--text-3)] transition-colors"
+          className="flex flex-col items-center gap-1 py-1.5 px-4 min-w-[64px] text-[var(--text-3)] transition-colors"
         >
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
             <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
             <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
@@ -108,7 +108,7 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
             <line x1="9" y1="8" x2="15" y2="8" />
             <line x1="17" y1="16" x2="23" y2="16" />
           </svg>
-          <span className="text-[10px] font-medium">设置</span>
+          <span className="text-[11px] font-medium">设置</span>
         </button>
       </nav>
 
@@ -116,26 +116,34 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
 
       <BottomSheet open={sheet === 'export'} onClose={() => setSheet(null)} title="导出简历">
         <div className="space-y-2.5">
-          <button onClick={handleExportPdf} className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-[var(--accent)] text-white text-[14px] font-medium active:opacity-80 transition-opacity">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <button
+            onClick={handleExportPdf}
+            disabled={loading === 'pdf'}
+            className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-[var(--accent)] text-white text-[14px] font-medium cursor-pointer active:opacity-80 hover:bg-[var(--accent-hover)] hover:shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
             </svg>
-            导出 PDF
+            {loading === 'pdf' ? '导出中...' : '导出 PDF'}
           </button>
-          <button onClick={handleExportDocx} className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl border border-[var(--border)] text-[14px] font-medium text-[var(--text)] active:bg-[var(--bg)] transition-colors">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <button
+            onClick={handleExportDocx}
+            disabled={loading === 'docx'}
+            className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl border border-[var(--border)] text-[14px] font-medium text-[var(--text)] cursor-pointer active:bg-[var(--bg)] hover:border-[var(--accent)] hover:shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
               <line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
             </svg>
-            导出 Word
+            {loading === 'docx' ? '导出中...' : '导出 Word'}
           </button>
           <button
             onClick={() => { setSheet(null); setTimeout(() => fileRef.current?.click(), 100) }}
-            className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl border border-[var(--border)] text-[14px] font-medium text-[var(--text)] active:bg-[var(--bg)] transition-colors"
+            className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl border border-[var(--border)] text-[14px] font-medium text-[var(--text)] cursor-pointer active:bg-[var(--bg)] hover:border-[var(--accent)] hover:shadow-sm transition-all"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" y1="3" x2="12" y2="15" />

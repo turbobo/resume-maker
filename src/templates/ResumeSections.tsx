@@ -13,14 +13,14 @@ function SectionTitle({ children, headingFamily, variant = 'line' }: {
 }) {
   if (variant === 'line') {
     return (
-      <h2 style={{ fontFamily: headingFamily }} className="text-[10pt] font-bold uppercase tracking-[0.1em] mb-1.5 pb-0.5 border-b border-[#e7e5e4]">
+      <h2 style={{ fontFamily: headingFamily }} className="text-[10pt] font-bold uppercase tracking-[0.1em] mb-1.5 pb-1.5 border-b border-[#e7e5e4]">
         {children}
       </h2>
     )
   }
   if (variant === 'bold') {
     return (
-      <h2 style={{ fontFamily: headingFamily }} className="text-[10pt] font-bold mb-2 pb-1 border-b-2 border-[#1c1917]">
+      <h2 style={{ fontFamily: headingFamily }} className="text-[10pt] font-bold mb-2 pb-1.5 border-b-2 border-[#1c1917]">
         {children}
       </h2>
     )
@@ -112,9 +112,9 @@ export function SkillsSection({ data, headingFamily, variant = 'line' }: Section
   return (
     <section>
       <SectionTitle headingFamily={headingFamily} variant={variant}>{SECTION_LABELS.skills}</SectionTitle>
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1.5">
         {skills.map((skill, i) => (
-          <span key={i} className="text-[8.5pt] text-[#57534e] bg-[#f5f5f4] px-1.5 py-0.5 rounded">
+          <span key={i} className="inline-flex items-center text-[8.5pt] leading-none text-[#57534e] bg-[#f5f5f4] px-2 py-1 rounded">
             {skill}
           </span>
         ))}

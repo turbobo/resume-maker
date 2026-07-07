@@ -31,8 +31,11 @@ body {
 
 input, textarea, select {
   font-family: inherit;
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text);
+}
+@media (min-width: 768px) {
+  input, textarea, select { font-size: 13px; }
 }
 input:focus, textarea:focus, select:focus {
   outline: none;

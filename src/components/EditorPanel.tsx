@@ -10,13 +10,13 @@ const Input = memo(function Input({ label, value, onChange, placeholder, type = 
 }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
+      <span className="text-[13px] md:text-[11px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-2.5 py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] text-[13px] transition-colors"
+        className="w-full px-3 md:px-2.5 py-2 md:py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[13px] transition-colors"
       />
     </label>
   )
@@ -27,13 +27,13 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
 }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
+      <span className="text-[13px] md:text-[11px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full px-2.5 py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] text-[13px] resize-none transition-colors"
+        className="w-full px-3 md:px-2.5 py-2 md:py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[13px] resize-none transition-colors"
       />
     </label>
   )
@@ -42,8 +42,8 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
 function SectionHeader({ title, onAdd }: { title: string; onAdd: () => void }) {
   return (
     <div className="flex items-center justify-between mb-2">
-      <h3 className="text-[12px] font-semibold text-[var(--text)]">{title}</h3>
-      <button onClick={onAdd} className="text-[11px] text-[var(--text-3)] hover:text-[var(--text)] transition-colors">
+      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)]">{title}</h3>
+      <button onClick={onAdd} className="text-[13px] md:text-[11px] px-2.5 py-1.5 md:px-0 md:py-0 rounded md:rounded-none text-[var(--text-3)] hover:text-[var(--text)] active:bg-[var(--bg)] md:active:bg-transparent transition-colors">
         + 添加
       </button>
     </div>
@@ -183,9 +183,9 @@ function SectionOrder() {
 
   return (
     <section>
-      <h3 className="text-[12px] font-semibold text-[var(--text)] mb-2">模块排序</h3>
-      <p className="text-[10px] text-[var(--text-3)] mb-2">拖拽或使用箭头调整简历模块顺序</p>
-      <div className="space-y-1">
+      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">模块排序</h3>
+      <p className="text-[12px] md:text-[10px] text-[var(--text-3)] mb-2">拖拽或使用箭头调整简历模块顺序</p>
+      <div className="space-y-1.5 md:space-y-1">
         {sectionOrder.map((id, idx) => (
           <div
             key={id}
@@ -194,21 +194,21 @@ function SectionOrder() {
             onDragOver={(e) => handleDragOver(e, idx)}
             onDrop={() => handleDrop(idx)}
             onDragEnd={() => setDragOver(null)}
-            className={`flex items-center gap-2 px-2.5 py-1.5 rounded border bg-[var(--surface)] cursor-grab active:cursor-grabbing transition-all
+            className={`flex items-center gap-2 px-3 md:px-2.5 py-2.5 md:py-1.5 rounded border bg-[var(--surface)] cursor-grab active:cursor-grabbing transition-all
               ${dragOver === idx ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[var(--border)] hover:border-[var(--border-strong)]'}`}
           >
-            <svg aria-hidden="true" className="w-3.5 h-3.5 text-[var(--text-3)] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <svg aria-hidden="true" className="w-4 h-4 md:w-3.5 md:h-3.5 text-[var(--text-3)] shrink-0" viewBox="0 0 24 24" fill="currentColor">
               <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
               <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
               <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
             </svg>
-            <span className="text-[12px] font-medium flex-1">{SECTION_LABELS[id]}</span>
-            <div className="flex gap-0.5">
+            <span className="text-[14px] md:text-[12px] font-medium flex-1">{SECTION_LABELS[id]}</span>
+            <div className="flex gap-1 md:gap-0.5">
               <button
                 onClick={() => moveUp(idx)}
                 disabled={idx === 0}
                 aria-label={`上移${SECTION_LABELS[id]}`}
-                className="w-5 h-5 rounded flex items-center justify-center text-[10px] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-30 transition-colors"
+                className="w-8 h-8 md:w-5 md:h-5 rounded flex items-center justify-center text-[14px] md:text-[10px] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-30 transition-colors"
               >
                 ↑
               </button>
@@ -216,7 +216,7 @@ function SectionOrder() {
                 onClick={() => moveDown(idx)}
                 disabled={idx === sectionOrder.length - 1}
                 aria-label={`下移${SECTION_LABELS[id]}`}
-                className="w-5 h-5 rounded flex items-center justify-center text-[10px] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-30 transition-colors"
+                className="w-8 h-8 md:w-5 md:h-5 rounded flex items-center justify-center text-[14px] md:text-[10px] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] disabled:opacity-30 transition-colors"
               >
                 ↓
               </button>
@@ -241,7 +241,7 @@ function BasicInfoSection() {
 
   return (
     <section>
-      <h3 className="text-[12px] font-semibold text-[var(--text)] mb-2">基本信息</h3>
+      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">基本信息</h3>
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">
           <Input label="姓名" value={name} onChange={(v) => update({ name: v })} placeholder="张三" />
@@ -328,7 +328,7 @@ function ProjectsSection() {
 
 export default function EditorPanel() {
   return (
-    <aside className="w-full md:w-[360px] flex-1 md:flex-none shrink-0 md:border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-4 space-y-5">
+    <aside className="w-full md:w-[360px] flex-1 md:flex-none shrink-0 md:border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-5 md:p-4 space-y-6 md:space-y-5">
       <SectionOrder />
       <BasicInfoSection />
       <SummarySection />
