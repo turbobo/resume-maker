@@ -4,6 +4,7 @@ import type { Experience, Education, Project, CustomSection } from '../types'
 import { SECTION_LABELS, BUILTIN_SECTIONS, getSectionLabel } from '../types'
 import type { SectionId } from '../types'
 import ATSPanel from './ATSPanel'
+import AIAnalysisPanel from './AIAnalysisPanel'
 import { normalizeDate } from '../utils/dateFormat'
 import { compressPhoto } from '../utils/photoCompress'
 
@@ -793,6 +794,7 @@ export default function EditorPanel() {
   return (
     <aside className="w-full md:w-[360px] flex-1 md:flex-none shrink-0 md:border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-5 md:p-4 space-y-6 md:space-y-5">
       <ATSPanel />
+      <AIAnalysisPanel />
       <SectionOrder />
       <BasicInfoSection />
       {activeSet.has('summary') && <SummarySection />}
