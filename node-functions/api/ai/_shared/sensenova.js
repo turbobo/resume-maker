@@ -10,6 +10,15 @@ const DEFAULT_BASE_URL = 'https://token.sensenova.cn/v1'
 const DEFAULT_MODEL = 'deepseek-v4-flash'
 const REQUEST_TIMEOUT_MS = 55 * 1000
 
+// ─── 内置 API Key（可选）───
+// 想让代码里直接带 Key：把商汤 Key 填到下方引号内即可（控制台环境变量优先于此处）。
+//
+// ⚠️ 安全警告（本仓库为公开仓库 github.com/turbobo/resume-maker）：
+//   - 本文件属服务端代码，不会下发到浏览器，但会随 Git 提交对所有人可见
+//   - 填入真实 Key 并推送后会立即泄露（自动扫描机器人会盗用额度）
+//   - 如需内置，请先将 GitHub 仓库改为 Private；已泄露的 Key 请立即在商汤控制台吊销重建
+const BUILTIN_API_KEY = ''
+
 export class UpstreamError extends Error {
   constructor(message, { status = 502, code = 'UPSTREAM_ERROR' } = {}) {
     super(message)
@@ -20,8 +29,9 @@ export class UpstreamError extends Error {
 }
 
 // 从环境变量读取 AI 配置（每次请求读取，支持控制台改动态生效）
+// API Key 优先级：控制台环境变量 SENSENOVA_API_KEY > 代码内置 BUILTIN_API_KEY
 export function readAIConfig(env) {
-  const apiKey = String(env?.SENSENOVA_API_KEY || '').trim()
+  const apiKey = String(env?.SENSENOVA_API_KEY || BUILTIN_API_KEY || '').trim()
   const baseUrl = String(env?.SENSENOVA_BASE_URL || DEFAULT_BASE_URL).trim().replace(/\/+$/, '')
   const model = String(env?.SENSENOVA_MODEL || DEFAULT_MODEL).trim()
   return { apiKey, baseUrl, model, configured: apiKey.length > 0 }
