@@ -91,7 +91,7 @@ export const DEFAULT_RESUME: ResumeData = {
   location: '北京',
   website: '',
   photo: '',
-  summary: '8 年前端开发经验，擅长 React 生态和大型项目架构设计。主导过多个千万级用户产品的前端重构，对性能优化和工程化有深入实践。',
+  summary: '8 年前端开发经验，擅长 React 生态和大型项目架构设计。主导过多个千万级用户产品的前端重构，页面性能提升 60% 以上；搭建团队组件库与工程化体系，研发效率提升 40%。对性能优化和微前端有深入实践。',
   skills: 'React, TypeScript, Next.js, Node.js, Tailwind CSS, Webpack, Vite, 性能优化, 微前端',
   experiences: [
     {

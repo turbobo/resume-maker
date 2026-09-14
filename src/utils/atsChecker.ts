@@ -2,6 +2,12 @@ import type { ResumeData } from '../types'
 
 export type ATSSeverity = 'error' | 'warning' | 'tip'
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export function isValidEmail(email: string): boolean {
+  return EMAIL_PATTERN.test(email)
+}
+
 export interface ATSIssue {
   id: string
   severity: ATSSeverity
@@ -46,7 +52,7 @@ export function checkATS(data: ResumeData): ATSResult {
     issues.push({ id: 'no-name', severity: 'error', message: '未填写姓名，ATS 无法识别候选人' })
   }
 
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+  if (isValidEmail(data.email)) {
     contactScore += 6
   } else if (data.email.trim()) {
     contactScore += 3

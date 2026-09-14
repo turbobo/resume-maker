@@ -1,10 +1,12 @@
 // AI 行业分析面板 — 选择目标行业，由大模型按行业给出简历优化建议
 // 服务端代理调用商汤 API，前端不接触 API Key
+// 准入门槛：简历体检 90 分 + 核心信息完整（见 utils/aiAccess.ts）
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store'
 import { AIRequestError } from '../utils/aiClient'
 import { analyzeResume, INDUSTRY_OPTIONS } from '../utils/resumeAnalyze'
+import { AI_MIN_SCORE, checkAIAnalysisAccess } from '../utils/aiAccess'
 import type { AnalyzeIssue, AnalyzeResult } from '../utils/resumeAnalyze'
 
 const SEVERITY_STYLES: Record<AnalyzeIssue['severity'], { bg: string; icon: string }> = {
@@ -39,10 +41,12 @@ export default function AIAnalysisPanel() {
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
+  const access = useMemo(() => checkAIAnalysisAccess(data), [data])
+
   useEffect(() => () => abortRef.current?.abort(), [])
 
   const handleAnalyze = async () => {
-    if (loading) return
+    if (loading || !access.allowed) return
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
@@ -121,17 +125,49 @@ export default function AIAnalysisPanel() {
             ))}
           </div>
 
+          {/* 准入门槛提示：未达标时展示解锁条件 */}
+          {!access.allowed && (
+            <div className="mt-2.5 rounded-lg border border-amber-200 bg-amber-50/60 p-2.5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] md:text-[10px] font-medium text-amber-700">完善简历后解锁 AI 分析</span>
+                <span className="text-[11px] md:text-[10px] font-semibold" style={{ color: scoreColor(access.score) }}>
+                  体检 {access.score} / {AI_MIN_SCORE} 分
+                </span>
+              </div>
+              <div className="h-1 rounded-full bg-amber-100 overflow-hidden mb-2">
+                <div
+                  className="h-full rounded-full bg-amber-400 transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.round((access.score / AI_MIN_SCORE) * 100))}%` }}
+                />
+              </div>
+              <ul className="space-y-1">
+                {access.blockers.map((blocker, i) => (
+                  <li key={i} className="flex gap-1.5 text-[11px] md:text-[10px] text-[var(--text-2)] leading-relaxed">
+                    <span className="text-amber-500 shrink-0">·</span>
+                    <span className="min-w-0">{blocker}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* 分析按钮 */}
           <button
             onClick={handleAnalyze}
-            disabled={loading}
-            className="w-full mt-2.5 flex items-center justify-center gap-2 px-3 py-2.5 md:py-2 rounded-lg bg-[var(--accent)] text-white text-[13px] md:text-[12px] font-medium cursor-pointer hover:bg-[var(--accent-hover)] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
+            disabled={loading || !access.allowed}
+            className={`w-full mt-2.5 flex items-center justify-center gap-2 px-3 py-2.5 md:py-2 rounded-lg text-[13px] md:text-[12px] font-medium transition-all ${
+              access.allowed
+                ? 'bg-[var(--accent)] text-white cursor-pointer hover:bg-[var(--accent-hover)] active:scale-[0.98] disabled:active:scale-100'
+                : 'bg-[var(--bg)] text-[var(--text-3)] border border-[var(--border)] cursor-not-allowed'
+            } disabled:opacity-70`}
           >
             {loading ? (
               <>
                 <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                 正在分析，约需 10-30 秒…
               </>
+            ) : !access.allowed ? (
+              '达到上方条件后解锁'
             ) : result ? (
               '重新分析'
             ) : (
