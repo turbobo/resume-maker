@@ -221,3 +221,17 @@ test('rewrite：上游 429 透传为 UPSTREAM_RATE_LIMITED', async () => {
   const body = await res.json()
   assert.equal(body.code, 'UPSTREAM_RATE_LIMITED')
 })
+
+test('rewrite：上游 400 错误体提取可读信息', async () => {
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({ error: { message: 'invalid temperature, should in [0,2].', type: 'invalid_request_error', code: '3' } }),
+      { status: 400 },
+    )
+  const res = await rewriteHandler(
+    makeContext({ action: 'generateSummary', payload: { name: '张三' } }, { clientIp: '10.8.0.5', url: 'https://example.com/api/ai/rewrite' }),
+  )
+  assert.equal(res.status, 502)
+  const body = await res.json()
+  assert.ok(body.message.includes('invalid temperature'))
+})

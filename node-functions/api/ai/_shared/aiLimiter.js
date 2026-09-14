@@ -1,10 +1,14 @@
 // 全站共享的 AI 限流器（惰性初始化，同一实例内所有 AI 接口共用一份额度）
+//
+// 全站日上限按上游免费档配额设定：deepseek-v4-flash 为 150 次 / 5 小时
+// （滚动窗口一天最多约 720 次），取 600 留安全余量，避免本服务先把上游额度打尽。
+
 import { createRateLimiter } from './rateLimit.js'
 
 const RATE_WINDOW_MS = 10 * 60 * 1000
 const RATE_WINDOW_MAX = 8
 const RATE_DAILY_MAX = 50
-const RATE_GLOBAL_DAILY_MAX = 2000
+const RATE_GLOBAL_DAILY_MAX = 600
 
 let limiter = null
 
