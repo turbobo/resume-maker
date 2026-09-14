@@ -1,10 +1,10 @@
 // AI 简历行业分析 — 客户端调用
-// 服务端：node-functions/api/ai/analyze.js（Prompt 与行业白名单在服务端）
+// 服务端：cloud-functions/api/ai/analyze.js（Prompt 与行业白名单在服务端）
 
 import type { ResumeData } from '../types'
 import { postAI } from './aiClient'
 
-// 行业选项（需与 node-functions/api/ai/analyze.js 的 INDUSTRIES 白名单保持一致）
+// 行业选项（需与 cloud-functions/api/ai/analyze.js 的 INDUSTRIES 白名单保持一致）
 export const INDUSTRY_OPTIONS = [
   '互联网 / IT',
   '人工智能 / 数据',

@@ -4,10 +4,10 @@
 import { test, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { createRateLimiter } from '../node-functions/api/ai/_shared/rateLimit.js'
-import { extractJson } from '../node-functions/api/ai/_shared/sensenova.js'
-import { onRequestPost as analyzeHandler } from '../node-functions/api/ai/analyze.js'
-import { onRequestPost as rewriteHandler } from '../node-functions/api/ai/rewrite.js'
+import { createRateLimiter } from '../cloud-functions/api/ai/_shared/rateLimit.js'
+import { extractJson } from '../cloud-functions/api/ai/_shared/sensenova.js'
+import { onRequestPost as analyzeHandler } from '../cloud-functions/api/ai/analyze.js'
+import { onRequestPost as rewriteHandler } from '../cloud-functions/api/ai/rewrite.js'
 
 const originalFetch = globalThis.fetch
 afterEach(() => {

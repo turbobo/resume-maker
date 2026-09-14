@@ -1,5 +1,5 @@
 // AI 简历内容生成器 — 通过服务端代理调用（商汤日日新，API Key 保存在服务端）
-// 服务端：node-functions/api/ai/rewrite.js（Prompt 模板在服务端，前端只传结构化数据）
+// 服务端：cloud-functions/api/ai/rewrite.js（Prompt 模板在服务端，前端只传结构化数据）
 
 import type { ResumeData, Experience, Project } from '../types'
 import { postAI } from './aiClient'

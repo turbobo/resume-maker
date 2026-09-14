@@ -1,9 +1,11 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install",
+  "installCommand": "npm install && npm install --no-save @rolldown/binding-linux-x64-gnu@1.1.4",
   "outputDirectory": "dist",
-  "nodeVersion": "20.18.0",
-  "nodeFunctionsConfig": {
-    "maxDuration": 60
+  "nodeVersion": "22.21.1",
+  "cloudFunctions": {
+    "nodejs": {
+      "maxDuration": 60
+    }
   }
 }
