@@ -138,13 +138,29 @@ export function EducationSection({ data, headingFamily, variant = 'line' }: Sect
 export function SkillsSection({ data, headingFamily, variant = 'line', chipBg = true }: SectionProps & { variant?: 'line' | 'plain' | 'bold'; chipBg?: boolean }) {
   const skills = useMemo(() => data.skills.split(',').map((s) => s.trim()).filter(Boolean), [data.skills])
   if (skills.length === 0) return null
+
+  if (!chipBg) {
+    return (
+      <SectionHighlight sectionId="skills">
+        <section>
+          <SectionTitle headingFamily={headingFamily} variant={variant}>{getSectionLabel('skills', data)}</SectionTitle>
+          <p className="text-[8.5pt] text-[#57534e] leading-[1.7]">
+            {skills.map((skill, i) => (
+              <span key={i} className="mr-2">{skill}</span>
+            ))}
+          </p>
+        </section>
+      </SectionHighlight>
+    )
+  }
+
   return (
     <SectionHighlight sectionId="skills">
       <section>
         <SectionTitle headingFamily={headingFamily} variant={variant}>{getSectionLabel('skills', data)}</SectionTitle>
         <div className="flex flex-wrap gap-1.5">
           {skills.map((skill, i) => (
-            <span key={i} className={`inline-flex items-center text-[8.5pt] leading-none text-[#57534e] px-2 py-1 rounded ${chipBg ? 'bg-[#f5f5f4]' : ''}`}>
+            <span key={i} className="inline-flex items-center text-[8.5pt] leading-none text-[#57534e] px-2 py-1 rounded bg-[#f5f5f4]">
               {skill}
             </span>
           ))}

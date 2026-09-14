@@ -47,6 +47,8 @@ export default function MobileNav({ activeView, onChangeView }: Props) {
 
   const handleExportPdf = async () => {
     setSheet(null)
+    // PDF 导出依赖预览区，移动端在编辑页时先切到预览（exportPdf 会等待挂载）
+    onChangeView('preview')
     await exportPdf()
   }
 

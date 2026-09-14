@@ -26,8 +26,12 @@ export function useResumeActions() {
     if (loading) return
     setLoading('docx')
     try {
+      const state = useStore.getState()
       const { exportDocx } = await import('../utils/exportDocx')
-      await exportDocx(useStore.getState().data)
+      await exportDocx(state.data, state.template)
+    } catch (err) {
+      console.error('导出 Word 失败:', err)
+      alert('导出 Word 失败，请重试')
     } finally {
       setLoading(null)
     }
@@ -39,6 +43,9 @@ export function useResumeActions() {
     try {
       const { exportPdf } = await import('../utils/exportPdf')
       await exportPdf()
+    } catch (err) {
+      console.error('导出 PDF 失败:', err)
+      alert('导出 PDF 失败，请重试')
     } finally {
       setLoading(null)
     }

@@ -1,5 +1,12 @@
-import type { ResumeData } from '../types'
-import { resolveFontFamily } from '../types'
+// Word 导出 — 按模板类型生成对应的 DOCX 版式
+// 双栏模板（modern / executive / minimal）：左/右侧栏 + 主内容用两列表格实现
+// 单栏模板（classic / compact）：照片 + 标题区 + 按 sectionOrder 顺序输出
+
+import type { ResumeData, TemplateId } from '../types'
+import { resolveFontFamily, getSectionLabel, SIDEBAR_SECTIONS } from '../types'
+
+const BODY_COLOR = '57534e'
+const MUTED_COLOR = 'a8a29e'
 
 function extractFontName(fontId: string): string {
   const family = resolveFontFamily(fontId)
@@ -17,159 +24,275 @@ function dataUrlToBuffer(dataUrl: string): Uint8Array {
   return bytes
 }
 
-export async function exportDocx(data: ResumeData) {
-  const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, ImageRun } = await import('docx')
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  // 延迟释放，避免下载尚未开始时 URL 已被回收
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+export async function exportDocx(data: ResumeData, template: TemplateId) {
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, ImageRun, Table, TableRow, TableCell, TableLayoutType, WidthType } = await import('docx')
   const headingFont = extractFontName(data.headingFont)
   const bodyFont = extractFontName(data.bodyFont)
 
-  function sectionHeader(text: string) {
-    return new Paragraph({
+  type ParagraphNode = InstanceType<typeof Paragraph>
+  type HeaderBuilder = (text: string) => ParagraphNode
+
+  // 主内容标题（大标题 + 下划线）
+  const sectionHeader: HeaderBuilder = (text) =>
+    new Paragraph({
       children: [new TextRun({ text, bold: true, size: 22, font: headingFont })],
       spacing: { before: 240, after: 120 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: 'e7e5e4' } },
     })
+
+  // 侧栏标题（小标题 + 浅色下划线）
+  const sidebarHeader: HeaderBuilder = (text) =>
+    new Paragraph({
+      children: [new TextRun({ text, bold: true, size: 16, font: headingFont })],
+      spacing: { before: 160, after: 80 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: 'd6d3d1' } },
+    })
+
+  // 文本按行拆分为多个段落（与预览 whitespace-pre-line 的效果一致）
+  function textParagraphs(text: string, size = 18, after = 60): ParagraphNode[] {
+    return text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map(
+        (line) =>
+          new Paragraph({
+            children: [new TextRun({ text: line, size, color: BODY_COLOR, font: bodyFont })],
+            spacing: { after },
+          }),
+      )
   }
 
-  const paragraphs: InstanceType<typeof Paragraph>[] = []
+  // 条目标题行：主标题 + 副标题 + 日期（如：公司 职位 起止时间）
+  function itemTitleParagraph(main: string, sub: string, dates: string): ParagraphNode {
+    const children = [new TextRun({ text: main, bold: true, size: 20, font: headingFont })]
+    if (sub) {
+      children.push(new TextRun({ text: `  ${sub}`, size: 19, color: BODY_COLOR, font: bodyFont }))
+    }
+    if (dates) {
+      children.push(new TextRun({ text: `  ${dates}`, size: 16, color: MUTED_COLOR, font: bodyFont }))
+    }
+    return new Paragraph({ children, spacing: { before: 80, after: 40 } })
+  }
 
-  // Photo
-  if (data.photo) {
+  function makePhotoParagraph(alignRight = false): ParagraphNode | null {
+    if (!data.photo) return null
     try {
       const photoData = dataUrlToBuffer(data.photo)
-      paragraphs.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 80 },
-          children: [
-            new ImageRun({
-              data: photoData,
-              transformation: { width: 105, height: 140 },
-              type: 'png',
-            }),
-          ],
-        }),
-      )
+      return new Paragraph({
+        alignment: alignRight ? AlignmentType.RIGHT : AlignmentType.CENTER,
+        spacing: { after: 80 },
+        children: [
+          new ImageRun({
+            data: photoData,
+            transformation: { width: 105, height: 140 },
+            type: 'png',
+          }),
+        ],
+      })
     } catch {
-      // ignore photo export errors
+      return null
     }
   }
 
-  paragraphs.push(new Paragraph({
-    children: [new TextRun({ text: data.name, bold: true, size: 36, font: headingFont })],
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 40 },
-  }))
+  function makeSummaryParagraphs(header: HeaderBuilder): ParagraphNode[] {
+    if (!data.summary) return []
+    return [header(getSectionLabel('summary', data)), ...textParagraphs(data.summary, 19, 100)]
+  }
+
+  function makeExperienceParagraphs(header: HeaderBuilder): ParagraphNode[] {
+    if (data.experiences.length === 0) return []
+    const result: ParagraphNode[] = [header(getSectionLabel('experience', data))]
+    for (const exp of data.experiences) {
+      result.push(itemTitleParagraph(exp.company, exp.title, `${exp.startDate} — ${exp.endDate}`))
+      result.push(...textParagraphs(exp.description, 18, 80))
+    }
+    return result
+  }
+
+  function makeProjectParagraphs(header: HeaderBuilder): ParagraphNode[] {
+    if (data.projects.length === 0) return []
+    const result: ParagraphNode[] = [header(getSectionLabel('projects', data))]
+    for (const proj of data.projects) {
+      result.push(itemTitleParagraph(proj.name, proj.role, `${proj.startDate} — ${proj.endDate}`))
+      result.push(...textParagraphs(proj.description, 18, 80))
+    }
+    return result
+  }
+
+  function makeEducationParagraphs(header: HeaderBuilder): ParagraphNode[] {
+    if (data.education.length === 0) return []
+    const result: ParagraphNode[] = [header(getSectionLabel('education', data))]
+    for (const edu of data.education) {
+      result.push(itemTitleParagraph(edu.school, [edu.degree, edu.major].filter(Boolean).join(' · '), `${edu.startDate} — ${edu.endDate}`))
+      result.push(...textParagraphs(edu.description, 18, 80))
+    }
+    return result
+  }
+
+  function makeSkillsParagraphs(header: HeaderBuilder): ParagraphNode[] {
+    if (!data.skills) return []
+    return [header(getSectionLabel('skills', data)), ...textParagraphs(data.skills, 18, 80)]
+  }
+
+  function makeCustomSectionParagraphs(id: string, header: HeaderBuilder): ParagraphNode[] {
+    const custom = data.customSections.find((s) => s.id === id)
+    if (!custom || !custom.content) return []
+    return [header(custom.title), ...textParagraphs(custom.content, 18, 80)]
+  }
+
+  function makeContentParagraphs(sectionId: string, header: HeaderBuilder): ParagraphNode[] {
+    switch (sectionId) {
+      case 'summary': return makeSummaryParagraphs(header)
+      case 'experience': return makeExperienceParagraphs(header)
+      case 'projects': return makeProjectParagraphs(header)
+      case 'education': return makeEducationParagraphs(header)
+      case 'skills': return makeSkillsParagraphs(header)
+      default: return makeCustomSectionParagraphs(sectionId, header)
+    }
+  }
+
+  const isSidebarSection = (id: string) => (SIDEBAR_SECTIONS as Set<string>).has(id)
+  const filename = `${data.name || '简历'}.docx`
+
+  // ── 双栏模板：modern / executive / minimal ──
+
+  if (template === 'modern' || template === 'executive' || template === 'minimal') {
+    const sidebarParagraphs: ParagraphNode[] = []
+    const mainParagraphs: ParagraphNode[] = []
+
+    // 侧栏头部：照片 + 姓名 + 职位 + 联系方式
+    const photoPara = makePhotoParagraph()
+    if (photoPara) sidebarParagraphs.push(photoPara)
+    sidebarParagraphs.push(
+      new Paragraph({ children: [new TextRun({ text: data.name, bold: true, size: 24, font: headingFont })] }),
+      new Paragraph({
+        children: [new TextRun({ text: data.title, size: 18, color: '78716c', font: bodyFont })],
+        spacing: { after: 160 },
+      }),
+    )
+    const contactItems = [data.email, data.phone, data.location, data.website].filter(Boolean)
+    if (contactItems.length > 0) {
+      sidebarParagraphs.push(sidebarHeader('联系方式'))
+      for (const item of contactItems) {
+        sidebarParagraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: item, size: 16, color: BODY_COLOR, font: bodyFont })],
+            spacing: { after: 40 },
+          }),
+        )
+      }
+    }
+
+    // 侧栏章节：
+    // - modern / executive：固定「技能 → 教育」顺序（与模板渲染一致，数据非空即输出）
+    // - minimal：跟随 sectionOrder 中的侧栏模块
+    const sidebarSectionIds = template === 'minimal'
+      ? data.sectionOrder.filter(isSidebarSection)
+      : ['skills', 'education']
+    for (const id of sidebarSectionIds) {
+      sidebarParagraphs.push(...makeContentParagraphs(id, sidebarHeader))
+    }
+
+    // 主栏章节：
+    // - modern / executive：简介固定在顶部，其余按 sectionOrder
+    // - minimal：按 sectionOrder（含简介）
+    if (template !== 'minimal') {
+      mainParagraphs.push(...makeSummaryParagraphs(sectionHeader))
+    }
+    const mainSectionIds = data.sectionOrder.filter(
+      (id) => !isSidebarSection(id) && (template === 'minimal' || id !== 'summary'),
+    )
+    for (const id of mainSectionIds) {
+      mainParagraphs.push(...makeContentParagraphs(id, sectionHeader))
+    }
+    if (mainParagraphs.length === 0) {
+      mainParagraphs.push(new Paragraph({ children: [] }))
+    }
+
+    const sidebarCell = new TableCell({
+      width: { size: 2600, type: WidthType.DXA },
+      shading: template === 'minimal' ? undefined : { fill: 'f5f5f4' },
+      margins: { top: 400, right: 300, bottom: 400, left: 300 },
+      children: sidebarParagraphs,
+    })
+
+    const mainCell = new TableCell({
+      width: { size: 6600, type: WidthType.DXA },
+      margins: { top: 400, right: 300, bottom: 400, left: 300 },
+      children: mainParagraphs,
+    })
+
+    const table = new Table({
+      width: { size: 9200, type: WidthType.DXA },
+      layout: TableLayoutType.FIXED,
+      rows: [new TableRow({ children: [sidebarCell, mainCell] })],
+    })
+
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: { margin: { top: 360, right: 360, bottom: 360, left: 360 } },
+        },
+        children: [table],
+      }],
+    })
+
+    downloadBlob(await Packer.toBlob(doc), filename)
+    return
+  }
+
+  // ── 单栏模板：classic / compact ──
+
+  const paragraphs: ParagraphNode[] = []
+
+  // 紧凑模板照片居右（与模板头部布局一致），其余模板居中
+  const photoPara = makePhotoParagraph(template === 'compact')
+  if (photoPara) paragraphs.push(photoPara)
+
+  paragraphs.push(
+    new Paragraph({
+      children: [new TextRun({ text: data.name, bold: true, size: 36, font: headingFont })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 40 },
+    }),
+  )
 
   if (data.title) {
-    paragraphs.push(new Paragraph({
-      children: [new TextRun({ text: data.title, size: 22, color: '57534e', font: bodyFont })],
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 60 },
-    }))
+    paragraphs.push(
+      new Paragraph({
+        children: [new TextRun({ text: data.title, size: 22, color: BODY_COLOR, font: bodyFont })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 60 },
+      }),
+    )
   }
 
   const contactParts = [data.email, data.phone, data.location, data.website].filter(Boolean)
   if (contactParts.length > 0) {
-    paragraphs.push(new Paragraph({
-      children: [new TextRun({ text: contactParts.join('  |  '), size: 18, color: '57534e', font: bodyFont })],
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 200 },
-      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '1c1917' } },
-    }))
+    paragraphs.push(
+      new Paragraph({
+        children: [new TextRun({ text: contactParts.join('  |  '), size: 18, color: BODY_COLOR, font: bodyFont })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 200 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '1c1917' } },
+      }),
+    )
   }
 
-  if (data.summary) {
-    paragraphs.push(new Paragraph({
-      children: [new TextRun({ text: data.summary, size: 19, color: '57534e', font: bodyFont })],
-      spacing: { after: 200 },
-    }))
-  }
-
+  // 所有章节按 sectionOrder 顺序输出（含简介，与模板渲染顺序一致）
   for (const sectionId of data.sectionOrder) {
-    switch (sectionId) {
-      case 'summary':
-        break
-
-      case 'experience':
-        if (data.experiences.length > 0) {
-          paragraphs.push(sectionHeader('工作经历'))
-          for (const exp of data.experiences) {
-            paragraphs.push(new Paragraph({
-              children: [
-                new TextRun({ text: exp.company, bold: true, size: 20, font: headingFont }),
-                new TextRun({ text: `  ${exp.title}`, size: 19, color: '57534e', font: bodyFont }),
-                new TextRun({ text: `  ${exp.startDate} — ${exp.endDate}`, size: 16, color: 'a8a29e', font: bodyFont }),
-              ],
-              spacing: { before: 80, after: 40 },
-            }))
-            if (exp.description) {
-              paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: exp.description, size: 18, color: '57534e', font: bodyFont })],
-                spacing: { after: 80 },
-              }))
-            }
-          }
-        }
-        break
-
-      case 'projects':
-        if (data.projects.length > 0) {
-          paragraphs.push(sectionHeader('项目经历'))
-          for (const proj of data.projects) {
-            paragraphs.push(new Paragraph({
-              children: [
-                new TextRun({ text: proj.name, bold: true, size: 20, font: headingFont }),
-                new TextRun({ text: `  ${proj.role}`, size: 19, color: '57534e', font: bodyFont }),
-                new TextRun({ text: `  ${proj.startDate} — ${proj.endDate}`, size: 16, color: 'a8a29e', font: bodyFont }),
-              ],
-              spacing: { before: 80, after: 40 },
-            }))
-            if (proj.description) {
-              paragraphs.push(new Paragraph({
-                children: [new TextRun({ text: proj.description, size: 18, color: '57534e', font: bodyFont })],
-                spacing: { after: 80 },
-              }))
-            }
-          }
-        }
-        break
-
-      case 'education':
-        if (data.education.length > 0) {
-          paragraphs.push(sectionHeader('教育背景'))
-          for (const edu of data.education) {
-            paragraphs.push(new Paragraph({
-              children: [
-                new TextRun({ text: edu.school, bold: true, size: 20, font: headingFont }),
-                new TextRun({ text: `  ${edu.degree} · ${edu.major}`, size: 19, color: '57534e', font: bodyFont }),
-                new TextRun({ text: `  ${edu.startDate} — ${edu.endDate}`, size: 16, color: 'a8a29e', font: bodyFont }),
-              ],
-              spacing: { before: 80, after: 80 },
-            }))
-          }
-        }
-        break
-
-      case 'skills':
-        if (data.skills) {
-          paragraphs.push(sectionHeader('技能'))
-          paragraphs.push(new Paragraph({
-            children: [new TextRun({ text: data.skills, size: 18, color: '57534e', font: bodyFont })],
-          }))
-        }
-        break
-
-      default: {
-        const custom = data.customSections.find((s) => s.id === sectionId)
-        if (custom && custom.content) {
-          paragraphs.push(sectionHeader(custom.title))
-          paragraphs.push(new Paragraph({
-            children: [new TextRun({ text: custom.content, size: 18, color: '57534e', font: bodyFont })],
-          }))
-        }
-        break
-      }
-    }
+    paragraphs.push(...makeContentParagraphs(sectionId, sectionHeader))
   }
 
   const doc = new Document({
@@ -181,11 +304,5 @@ export async function exportDocx(data: ResumeData) {
     }],
   })
 
-  const blob = await Packer.toBlob(doc)
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${data.name || '简历'}.docx`
-  a.click()
-  URL.revokeObjectURL(url)
+  downloadBlob(await Packer.toBlob(doc), filename)
 }
