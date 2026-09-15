@@ -92,7 +92,8 @@ export function applyListToggle(value: string, start: number, end: number, type:
     if (allTyped) {
       next = stripped
     } else if (type === 'unordered') {
-      next = stripped.replace(/^(\s*)/, '$1- ')
+      // 无序列表统一使用圆点标记
+      next = stripped.replace(/^(\s*)/, '$1• ')
     } else {
       next = stripped.replace(/^(\s*)/, `$1${orderedIndex}. `)
       orderedIndex += 1

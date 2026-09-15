@@ -6,14 +6,15 @@ import { getSectionLabel } from '../types'
 import { downloadBlob } from './download'
 
 // 多行文本拆为 Markdown 列表项：
-// 已有有序（1. / 1、/ 1)）或无序（- * • ·）标记的行保留原标记，普通行统一加 "- "
+// 有序行（1. / 1、/ 1)）保留原标记；无序行（- * • ·）标准化为 Markdown 标准的 "- "；普通行加 "- "
 function toBulletList(text: string): string {
   return text
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      if (/^\d+[.、)]\s+/.test(line) || /^[-*•·]\s+/.test(line)) return line
+      if (/^\d+[.、)]\s+/.test(line)) return line
+      if (/^[-*•·]\s+/.test(line)) return line.replace(/^[-*•·]\s+/, '- ')
       return `- ${line}`
     })
     .join('\n')
