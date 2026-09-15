@@ -7,38 +7,52 @@ import ATSPanel from './ATSPanel'
 import AIAnalysisPanel from './AIAnalysisPanel'
 import { normalizeDate } from '../utils/dateFormat'
 import { compressPhoto } from '../utils/photoCompress'
-import { handleListEnter } from '../utils/listInput'
+import { handleListEnter, applyListToggle, type ListType } from '../utils/listInput'
 
-// ─── 列表输入辅助：Enter 自动延续有序/无序列表，空项退出 ───
+// ─── 列表输入辅助：Enter 自动延续列表；工具栏按钮应用/取消列表标记 ───
 
-function useListKeydown(
+function useListInput(
   value: string,
   onChange: (v: string) => void,
   taRef: React.RefObject<HTMLTextAreaElement | null>,
 ) {
-  const pendingCursor = useRef<number | null>(null)
+  const pendingSel = useRef<{ start: number; end: number } | null>(null)
 
-  // 受控组件更新后恢复光标位置
+  // 受控组件更新后恢复光标/选区
   useLayoutEffect(() => {
     const ta = taRef.current
-    if (ta && pendingCursor.current !== null) {
-      ta.selectionStart = ta.selectionEnd = pendingCursor.current
-      pendingCursor.current = null
+    if (ta && pendingSel.current) {
+      ta.selectionStart = pendingSel.current.start
+      ta.selectionEnd = pendingSel.current.end
+      pendingSel.current = null
     }
   })
 
-  return useCallback(
+  const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing) return
       const el = e.currentTarget
       const result = handleListEnter(value, el.selectionStart, el.selectionStart !== el.selectionEnd)
       if (!result.handled) return
       e.preventDefault()
-      pendingCursor.current = result.cursor ?? null
+      pendingSel.current = { start: result.cursor ?? 0, end: result.cursor ?? 0 }
       onChange(result.value ?? value)
     },
     [value, onChange, taRef],
   )
+
+  const toggleList = useCallback(
+    (type: ListType) => {
+      const ta = taRef.current
+      if (!ta) return
+      const result = applyListToggle(value, ta.selectionStart, ta.selectionEnd, type)
+      pendingSel.current = { start: result.selectionStart, end: result.selectionEnd }
+      onChange(result.value)
+    },
+    [value, onChange, taRef],
+  )
+
+  return { onKeyDown, toggleList }
 }
 
 // ─── Generic drag-to-reorder hook ───
@@ -148,11 +162,47 @@ const DateInput = memo(function DateInput({ label, value, onChange, placeholder,
   )
 })
 
+// ─── 列表快捷按钮（无序 / 有序）───
+
+function ListButtons({ onToggle }: { onToggle: (type: ListType) => void }) {
+  const btnClass = 'p-1 rounded text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] transition-colors'
+  return (
+    <>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onToggle('unordered')}
+        aria-label="无序列表"
+        title="无序列表"
+        className={btnClass}
+      >
+        <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" />
+          <circle cx="4.5" cy="6" r="1" fill="currentColor" /><circle cx="4.5" cy="12" r="1" fill="currentColor" /><circle cx="4.5" cy="18" r="1" fill="currentColor" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onToggle('ordered')}
+        aria-label="有序列表"
+        title="有序列表"
+        className={btnClass}
+      >
+        <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="10" y1="6" x2="20" y2="6" /><line x1="10" y1="12" x2="20" y2="12" /><line x1="10" y1="18" x2="20" y2="18" />
+          <path d="M4 6h1v4" /><path d="M4 10h2" /><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" />
+        </svg>
+      </button>
+    </>
+  )
+}
+
 function TextEditModal({ label, value, onChange, onClose, onFocus, onBlur }: {
   label: string; value: string; onChange: (v: string) => void; onClose: () => void; onFocus?: () => void; onBlur?: () => void
 }) {
   const ref = useRef<HTMLTextAreaElement>(null)
-  const onListKeyDown = useListKeydown(value, onChange, ref)
+  const { onKeyDown: onListKeyDown, toggleList } = useListInput(value, onChange, ref)
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center" onClick={onClose}>
@@ -164,13 +214,16 @@ function TextEditModal({ label, value, onChange, onClose, onFocus, onBlur }: {
       >
         <div className="flex items-center justify-between px-4 md:px-5 py-3 border-b border-[var(--border)] shrink-0">
           <h3 className="text-[15px] md:text-[14px] font-semibold text-[var(--text)]">{label}</h3>
-          <button
-            onClick={onClose}
-            aria-label="关闭"
-            className="w-8 h-8 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] transition-colors"
-          >
-            <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          <div className="flex items-center gap-1">
+            <ListButtons onToggle={toggleList} />
+            <button
+              onClick={onClose}
+              aria-label="关闭"
+              className="w-8 h-8 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)] transition-colors"
+            >
+              <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
         </div>
         <textarea
           ref={ref}
@@ -192,21 +245,24 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
 }) {
   const [expanded, setExpanded] = useState(false)
   const taRef = useRef<HTMLTextAreaElement>(null)
-  const onListKeyDown = useListKeydown(value, onChange, taRef)
+  const { onKeyDown: onListKeyDown, toggleList } = useListInput(value, onChange, taRef)
 
   return (
     <div className="block">
       <div className="flex items-center justify-between mb-1">
         <span className="text-[13px] md:text-[12px] font-medium text-[var(--text-2)]">{label}</span>
-        <button
-          onClick={() => setExpanded(true)}
-          aria-label="展开编辑"
-          className="p-1 rounded text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--bg)] transition-colors"
-        >
-          <svg aria-hidden="true" className="w-3.5 h-3.5 md:w-3 md:h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
-          </svg>
-        </button>
+        <div className="flex items-center gap-0.5">
+          <ListButtons onToggle={toggleList} />
+          <button
+            onClick={() => setExpanded(true)}
+            aria-label="展开编辑"
+            className="p-1 rounded text-[var(--text-3)] hover:text-[var(--text-2)] hover:bg-[var(--bg)] transition-colors"
+          >
+            <svg aria-hidden="true" className="w-3.5 h-3.5 md:w-3 md:h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <textarea
         ref={taRef}
