@@ -76,7 +76,7 @@ const Input = memo(function Input({ label, value, onChange, placeholder, type = 
 }) {
   return (
     <label className="block">
-      <span className="text-[13px] md:text-[11px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
+      <span className="text-[13px] md:text-[12px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
       <input
         type={type}
         value={value}
@@ -84,7 +84,7 @@ const Input = memo(function Input({ label, value, onChange, placeholder, type = 
         onFocus={onFocus}
         onBlur={onBlur}
         placeholder={placeholder}
-        className="w-full px-3 md:px-2.5 py-2 md:py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[13px] transition-colors"
+        className="w-full px-3 md:px-3 py-2 md:py-2 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[14px] transition-colors"
       />
     </label>
   )
@@ -101,7 +101,7 @@ const DateInput = memo(function DateInput({ label, value, onChange, placeholder,
 
   return (
     <label className="block">
-      <span className="text-[13px] md:text-[11px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
+      <span className="text-[13px] md:text-[12px] font-medium text-[var(--text-2)] mb-1 block">{label}</span>
       <input
         type="text"
         value={value}
@@ -109,7 +109,7 @@ const DateInput = memo(function DateInput({ label, value, onChange, placeholder,
         onFocus={onFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className="w-full px-3 md:px-2.5 py-2 md:py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[13px] transition-colors"
+        className="w-full px-3 md:px-3 py-2 md:py-2 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[14px] transition-colors"
       />
     </label>
   )
@@ -160,7 +160,7 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
   return (
     <div className="block">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[13px] md:text-[11px] font-medium text-[var(--text-2)]">{label}</span>
+        <span className="text-[13px] md:text-[12px] font-medium text-[var(--text-2)]">{label}</span>
         <button
           onClick={() => setExpanded(true)}
           aria-label="展开编辑"
@@ -178,7 +178,7 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
         onBlur={onBlur}
         placeholder={placeholder}
         rows={rows}
-        className="w-full px-3 md:px-2.5 py-2 md:py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[13px] resize-none transition-colors"
+        className="w-full px-3 md:px-3 py-2 md:py-2 rounded border border-[var(--border)] bg-[var(--surface)] text-base md:text-[14px] resize-none transition-colors"
       />
       {expanded && (
         <TextEditModal
@@ -197,8 +197,8 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
 function SectionHeader({ title, onAdd }: { title: string; onAdd: () => void }) {
   return (
     <div className="flex items-center justify-between mb-2">
-      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)]">{title}</h3>
-      <button onClick={onAdd} className="text-[13px] md:text-[11px] px-2.5 py-1.5 md:px-0 md:py-0 rounded md:rounded-none text-[var(--text-3)] hover:text-[var(--text)] active:bg-[var(--bg)] md:active:bg-transparent transition-colors">
+      <h3 className="text-[14px] md:text-[13px] font-semibold text-[var(--text)]">{title}</h3>
+      <button onClick={onAdd} className="text-[13px] md:text-[12px] px-2.5 py-1.5 md:px-0 md:py-0 rounded md:rounded-none text-[var(--text-3)] hover:text-[var(--text)] active:bg-[var(--bg)] md:active:bg-transparent transition-colors">
         + 添加
       </button>
     </div>
@@ -273,7 +273,7 @@ const ExperienceCard = memo(function ExperienceCard({ item, dragHandle, isDraggi
           <DateInput label="开始" value={item.startDate} onChange={(v) => updateExperience(item.id, { startDate: v })} placeholder="2021-03" onFocus={onFocus} onBlur={onBlur} />
           <DateInput label="结束" value={item.endDate} onChange={(v) => updateExperience(item.id, { endDate: v })} placeholder="至今" onFocus={onFocus} onBlur={onBlur} />
         </div>
-        <TextArea label="工作内容" value={item.description} onChange={(v) => updateExperience(item.id, { description: v })} placeholder="描述主要职责和成果..." rows={2} onFocus={onFocus} onBlur={onBlur} />
+        <TextArea label="工作内容" value={item.description} onChange={(v) => updateExperience(item.id, { description: v })} placeholder="描述主要职责和成果..." rows={3} onFocus={onFocus} onBlur={onBlur} />
       </div>
     </ItemCard>
   )
@@ -329,7 +329,7 @@ const ProjectCard = memo(function ProjectCard({ item, dragHandle, isDragging, is
           <DateInput label="开始" value={item.startDate} onChange={(v) => updateProject(item.id, { startDate: v })} placeholder="2022-01" onFocus={onFocus} onBlur={onBlur} />
           <DateInput label="结束" value={item.endDate} onChange={(v) => updateProject(item.id, { endDate: v })} placeholder="2023-06" onFocus={onFocus} onBlur={onBlur} />
         </div>
-        <TextArea label="项目描述" value={item.description} onChange={(v) => updateProject(item.id, { description: v })} placeholder="描述项目内容和你的贡献..." rows={2} onFocus={onFocus} onBlur={onBlur} />
+        <TextArea label="项目描述" value={item.description} onChange={(v) => updateProject(item.id, { description: v })} placeholder="描述项目内容和你的贡献..." rows={3} onFocus={onFocus} onBlur={onBlur} />
       </div>
     </ItemCard>
   )
@@ -431,7 +431,7 @@ function SectionOrder() {
 
   return (
     <section>
-      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">模块管理</h3>
+      <h3 className="text-[14px] md:text-[13px] font-semibold text-[var(--text)] mb-2">模块管理</h3>
       <p className="text-[12px] md:text-[10px] text-[var(--text-3)] mb-2">拖拽排序 · 点击名称重命名 · 可删除或新增模块</p>
       <div className="space-y-1.5 md:space-y-1">
         {sectionOrder.map((id, idx) => (
@@ -462,12 +462,12 @@ function SectionOrder() {
                 onBlur={() => saveLabel(id)}
                 onKeyDown={(e) => { if (e.key === 'Enter') saveLabel(id); if (e.key === 'Escape') setEditingId(null) }}
                 autoFocus
-                className="flex-1 text-[14px] md:text-[12px] font-medium bg-transparent border-b border-[var(--accent)] outline-none py-0"
+                className="flex-1 text-[14px] md:text-[13px] font-medium bg-transparent border-b border-[var(--accent)] outline-none py-0"
               />
             ) : (
               <span
                 onClick={() => startEditing(id)}
-                className="text-[14px] md:text-[12px] font-medium flex-1 cursor-text hover:text-[var(--accent)] transition-colors"
+                className="text-[14px] md:text-[13px] font-medium flex-1 cursor-text hover:text-[var(--accent)] transition-colors"
               >
                 {getSectionLabel(id, data)}
               </span>
@@ -487,7 +487,7 @@ function SectionOrder() {
       <div className="mt-2">
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="text-[13px] md:text-[11px] text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
+          className="text-[13px] md:text-[12px] text-[var(--text-3)] hover:text-[var(--text)] transition-colors"
         >
           + 添加模块
         </button>
@@ -574,7 +574,7 @@ function BasicInfoSection() {
   return (
     <section>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)]">基本信息</h3>
+        <h3 className="text-[14px] md:text-[13px] font-semibold text-[var(--text)]">基本信息</h3>
       </div>
       <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
       <div className="flex flex-col md:flex-row gap-3 mb-2">
@@ -681,7 +681,7 @@ function SkillsEditorSection() {
 
   return (
     <section>
-      <h3 className="text-[14px] md:text-[12px] font-semibold text-[var(--text)] mb-2">{label}</h3>
+      <h3 className="text-[14px] md:text-[13px] font-semibold text-[var(--text)] mb-2">{label}</h3>
       <div className="flex flex-wrap gap-1.5 p-2.5 md:p-2 rounded border border-[var(--border)] bg-[var(--surface)] min-h-[44px] md:min-h-[36px] cursor-text"
         onClick={(e) => { const inp = (e.currentTarget as HTMLElement).querySelector('input'); inp?.focus() }}
       >
@@ -705,7 +705,7 @@ function SkillsEditorSection() {
           onFocus={onFocus}
           onBlur={() => { if (input.trim()) addSkill(input); onBlur() }}
           placeholder={skillList.length === 0 ? '输入技能，回车添加' : '添加...'}
-          className="flex-1 min-w-[80px] text-base md:text-[13px] bg-transparent outline-none py-1 placeholder:text-[var(--text-3)]"
+          className="flex-1 min-w-[80px] text-base md:text-[14px] bg-transparent outline-none py-1 placeholder:text-[var(--text-3)]"
         />
       </div>
     </section>
@@ -792,7 +792,7 @@ export default function EditorPanel() {
   const activeSet = useMemo(() => new Set(sectionOrder), [sectionOrder])
 
   return (
-    <aside className="w-full md:w-[360px] flex-1 md:flex-none shrink-0 md:border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-5 md:p-4 space-y-6 md:space-y-5">
+    <aside className="w-full md:w-[var(--editor-width)] flex-1 md:flex-none shrink-0 md:border-r border-[var(--border)] bg-[var(--bg)] overflow-y-auto p-5 md:p-5 space-y-6 md:space-y-5">
       <ATSPanel />
       <AIAnalysisPanel />
       <SectionOrder />

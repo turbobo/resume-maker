@@ -19,6 +19,8 @@ export default function TopBar() {
   const bodyFont = useStore((s) => s.data.bodyFont)
   const setHeadingFont = useStore((s) => s.setHeadingFont)
   const setBodyFont = useStore((s) => s.setBodyFont)
+  const layoutMode = useStore((s) => s.layoutMode)
+  const setLayoutMode = useStore((s) => s.setLayoutMode)
   const fileRef = useRef<HTMLInputElement>(null)
   const { handleImport, handleExportDocx, handleExportMarkdown, handleExportPdf, loading } = useResumeActions()
 
@@ -105,6 +107,43 @@ export default function TopBar() {
       {/* Right: Actions — desktop only */}
       <div className="hidden md:flex items-center gap-2 shrink-0 ml-2">
         <input ref={fileRef} type="file" accept=".docx,.doc" className="hidden" onChange={handleImport} />
+        {/* 布局切换：专注编辑 / 专注预览 */}
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => setLayoutMode(layoutMode === 'focus-editor' ? 'split' : 'focus-editor')}
+            aria-label="专注编辑"
+            title="专注编辑（收起预览）"
+            className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${
+              layoutMode === 'focus-editor'
+                ? 'bg-[var(--accent)] text-white'
+                : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)]'
+            }`}
+          >
+            <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+              <path d="M15 9l-2 3 2 3" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setLayoutMode(layoutMode === 'focus-preview' ? 'split' : 'focus-preview')}
+            aria-label="专注预览"
+            title="专注预览（全屏查看简历，Esc 退出）"
+            className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${
+              layoutMode === 'focus-preview'
+                ? 'bg-[var(--accent)] text-white'
+                : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg)]'
+            }`}
+          >
+            <svg aria-hidden="true" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+              <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+              <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+              <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+            </svg>
+          </button>
+        </div>
+        <span className="w-px h-4 bg-[var(--border)]" aria-hidden="true" />
         <button
           onClick={() => fileRef.current?.click()}
           disabled={loading === 'import'}

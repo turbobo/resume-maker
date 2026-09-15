@@ -5,12 +5,23 @@ import { DEFAULT_RESUME, uid } from './types'
 
 export type EditFocus = { section: string; itemId?: string } | null
 
+// 桌面端布局：split 分栏 / focus-editor 专注编辑（收起预览）/ focus-preview 专注预览（收起编辑）
+export type LayoutMode = 'split' | 'focus-editor' | 'focus-preview'
+
+export const DEFAULT_EDITOR_WIDTH = 420
+export const MIN_EDITOR_WIDTH = 320
+export const MAX_EDITOR_WIDTH = 560
+
 interface Store {
   data: ResumeData
   template: TemplateId
   editFocus: EditFocus
+  editorWidth: number
+  layoutMode: LayoutMode
   setEditFocus: (focus: EditFocus) => void
   setTemplate: (t: TemplateId) => void
+  setEditorWidth: (w: number) => void
+  setLayoutMode: (m: LayoutMode) => void
   update: (partial: Partial<ResumeData>) => void
   // Sections
   reorderSections: (order: string[]) => void
@@ -48,8 +59,12 @@ export const useStore = create<Store>()(
   data: DEFAULT_RESUME,
   template: 'classic',
   editFocus: null,
+  editorWidth: DEFAULT_EDITOR_WIDTH,
+  layoutMode: 'split',
   setEditFocus: (focus) => set({ editFocus: focus }),
   setTemplate: (t) => set({ template: t }),
+  setEditorWidth: (w) => set({ editorWidth: Math.min(MAX_EDITOR_WIDTH, Math.max(MIN_EDITOR_WIDTH, Math.round(w))) }),
+  setLayoutMode: (m) => set({ layoutMode: m }),
 
   update: (partial) => set((s) => ({ data: { ...s.data, ...partial } })),
 
@@ -172,6 +187,6 @@ export const useStore = create<Store>()(
   importData: (incoming) =>
     set((s) => ({ data: { ...s.data, ...incoming } })),
     }),
-    { name: 'resume-maker-storage', partialize: (s) => ({ data: s.data, template: s.template }) },
+    { name: 'resume-maker-storage', partialize: (s) => ({ data: s.data, template: s.template, editorWidth: s.editorWidth }) },
   ),
 )
