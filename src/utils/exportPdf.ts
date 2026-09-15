@@ -8,11 +8,14 @@ const A4_WIDTH_MM = 210
 const A4_HEIGHT_MM = 297
 const RENDER_TIMEOUT_MS = 30 * 1000
 
-async function waitForPrintArea(timeoutMs = 3000): Promise<HTMLElement | null> {
+// 等待预览区挂载完成：模板组件为 React lazy 懒加载，
+// 移动端从编辑页切换过来时 .print-area 外壳会先出现，
+// 必须等内部内容（h1 姓名）就绪再截图，否则会截到空白页
+async function waitForPrintArea(timeoutMs = 5000): Promise<HTMLElement | null> {
   const start = Date.now()
   for (;;) {
     const el = document.querySelector('.print-area') as HTMLElement | null
-    if (el) return el
+    if (el && el.querySelector('h1')) return el
     if (Date.now() - start >= timeoutMs) return null
     await new Promise((resolve) => setTimeout(resolve, 100))
   }
@@ -80,6 +83,13 @@ export async function exportPdf() {
             clonedPage.style.transform = 'none'
             clonedPage.style.boxShadow = 'none'
           }
+          // html2canvas 对行内 SVG 的垂直对齐处理存在缺陷（图标整体偏上），
+          // 导出时直接对克隆的图标元素应用像素级 translateY 补偿（数值经实测校准）；
+          // 预览不受影响
+          clonedDoc.querySelectorAll('svg.contact-icon').forEach((el) => {
+            const icon = el as SVGElement
+            icon.style.transform = 'translateY(1.6px)'
+          })
         },
       }),
       RENDER_TIMEOUT_MS,
