@@ -3,7 +3,7 @@ import { useStore } from '../store'
 
 export function useResumeActions() {
   const importData = useStore((s) => s.importData)
-  const [loading, setLoading] = useState<'pdf' | 'docx' | 'import' | null>(null)
+  const [loading, setLoading] = useState<'pdf' | 'docx' | 'md' | 'import' | null>(null)
 
   const handleImport = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -37,6 +37,21 @@ export function useResumeActions() {
     }
   }
 
+  const handleExportMarkdown = async () => {
+    if (loading) return
+    setLoading('md')
+    try {
+      const state = useStore.getState()
+      const { exportMarkdownFile } = await import('../utils/exportMarkdown')
+      exportMarkdownFile(state.data)
+    } catch (err) {
+      console.error('导出 Markdown 失败:', err)
+      alert('导出 Markdown 失败，请重试')
+    } finally {
+      setLoading(null)
+    }
+  }
+
   const handleExportPdf = async () => {
     if (loading) return
     setLoading('pdf')
@@ -51,5 +66,5 @@ export function useResumeActions() {
     }
   }
 
-  return { handleImport, handleExportDocx, handleExportPdf, loading }
+  return { handleImport, handleExportDocx, handleExportMarkdown, handleExportPdf, loading }
 }

@@ -20,7 +20,7 @@ export default function TopBar() {
   const setHeadingFont = useStore((s) => s.setHeadingFont)
   const setBodyFont = useStore((s) => s.setBodyFont)
   const fileRef = useRef<HTMLInputElement>(null)
-  const { handleImport, handleExportDocx, handleExportPdf, loading } = useResumeActions()
+  const { handleImport, handleExportDocx, handleExportMarkdown, handleExportPdf, loading } = useResumeActions()
 
   useEffect(() => {
     const activeIds = new Set([headingFont, bodyFont])
@@ -118,6 +118,13 @@ export default function TopBar() {
           className="px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)] hover:text-[var(--text)] hover:shadow-sm active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading === 'docx' ? '导出中...' : '导出 Word'}
+        </button>
+        <button
+          onClick={handleExportMarkdown}
+          disabled={loading === 'md'}
+          className="px-3 py-1.5 rounded text-[11px] font-medium text-[var(--text-2)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)] hover:text-[var(--text)] hover:shadow-sm active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading === 'md' ? '导出中...' : '导出 MD'}
         </button>
         <button
           onClick={handleExportPdf}
