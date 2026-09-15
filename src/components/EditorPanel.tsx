@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, memo, useCallback } from 'react'
+import { useState, useRef, useMemo, memo, useCallback, useLayoutEffect } from 'react'
 import { useStore } from '../store'
 import type { Experience, Education, Project, CustomSection } from '../types'
 import { SECTION_LABELS, BUILTIN_SECTIONS, getSectionLabel } from '../types'
@@ -7,6 +7,39 @@ import ATSPanel from './ATSPanel'
 import AIAnalysisPanel from './AIAnalysisPanel'
 import { normalizeDate } from '../utils/dateFormat'
 import { compressPhoto } from '../utils/photoCompress'
+import { handleListEnter } from '../utils/listInput'
+
+// ─── 列表输入辅助：Enter 自动延续有序/无序列表，空项退出 ───
+
+function useListKeydown(
+  value: string,
+  onChange: (v: string) => void,
+  taRef: React.RefObject<HTMLTextAreaElement | null>,
+) {
+  const pendingCursor = useRef<number | null>(null)
+
+  // 受控组件更新后恢复光标位置
+  useLayoutEffect(() => {
+    const ta = taRef.current
+    if (ta && pendingCursor.current !== null) {
+      ta.selectionStart = ta.selectionEnd = pendingCursor.current
+      pendingCursor.current = null
+    }
+  })
+
+  return useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing) return
+      const el = e.currentTarget
+      const result = handleListEnter(value, el.selectionStart, el.selectionStart !== el.selectionEnd)
+      if (!result.handled) return
+      e.preventDefault()
+      pendingCursor.current = result.cursor ?? null
+      onChange(result.value ?? value)
+    },
+    [value, onChange, taRef],
+  )
+}
 
 // ─── Generic drag-to-reorder hook ───
 
@@ -119,6 +152,7 @@ function TextEditModal({ label, value, onChange, onClose, onFocus, onBlur }: {
   label: string; value: string; onChange: (v: string) => void; onClose: () => void; onFocus?: () => void; onBlur?: () => void
 }) {
   const ref = useRef<HTMLTextAreaElement>(null)
+  const onListKeyDown = useListKeydown(value, onChange, ref)
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center" onClick={onClose}>
@@ -142,6 +176,7 @@ function TextEditModal({ label, value, onChange, onClose, onFocus, onBlur }: {
           ref={ref}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={onListKeyDown}
           onFocus={onFocus}
           onBlur={onBlur}
           autoFocus
@@ -156,6 +191,8 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
   label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number; onFocus?: () => void; onBlur?: () => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const taRef = useRef<HTMLTextAreaElement>(null)
+  const onListKeyDown = useListKeydown(value, onChange, taRef)
 
   return (
     <div className="block">
@@ -172,8 +209,10 @@ const TextArea = memo(function TextArea({ label, value, onChange, placeholder, r
         </button>
       </div>
       <textarea
+        ref={taRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onListKeyDown}
         onFocus={onFocus}
         onBlur={onBlur}
         placeholder={placeholder}

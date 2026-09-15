@@ -5,13 +5,17 @@ import type { ResumeData } from '../types'
 import { getSectionLabel } from '../types'
 import { downloadBlob } from './download'
 
-// 多行文本拆为 Markdown 列表项（去除行首已有的列表符号，统一为 "- "）
+// 多行文本拆为 Markdown 列表项：
+// 已有有序（1. / 1、/ 1)）或无序（- * • ·）标记的行保留原标记，普通行统一加 "- "
 function toBulletList(text: string): string {
   return text
     .split('\n')
-    .map((line) => line.trim().replace(/^[-•·*]\s*/, ''))
+    .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => `- ${line}`)
+    .map((line) => {
+      if (/^\d+[.、)]\s+/.test(line) || /^[-*•·]\s+/.test(line)) return line
+      return `- ${line}`
+    })
     .join('\n')
 }
 
