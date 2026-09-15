@@ -37,39 +37,47 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
           </div>
         </SectionHighlight>
 
-        {/* Skills */}
-        {skills.length > 0 && (
-          <SectionHighlight sectionId="skills">
-            <div>
-              <h2 style={{ fontFamily: headingFont }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{getSectionLabel('skills', data)}</h2>
-              <div className="flex flex-wrap gap-1">
-                {skills.map((skill, i) => (
-                  <span key={i} className="text-[7.5pt] text-[#57534e] bg-white px-1.5 py-0.5 rounded border border-[#e7e5e4]">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </SectionHighlight>
-        )}
-
-        {/* Education */}
-        {data.education.length > 0 && (
-          <SectionHighlight sectionId="education">
-            <div>
-              <h2 style={{ fontFamily: headingFont }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{getSectionLabel('education', data)}</h2>
-              {data.education.map((edu) => (
-                <SectionHighlight key={edu.id} sectionId="education" itemId={edu.id}>
-                  <div className="mb-1.5">
-                    <p style={{ fontFamily: headingFont }} className="font-bold text-[8.5pt] leading-tight">{edu.school}</p>
-                    <p className="text-[7.5pt] text-[#57534e]">{edu.degree} · {edu.major}</p>
-                    <p className="text-[7pt] text-[#a8a29e]">{edu.startDate} — {edu.endDate}</p>
+        {/* Sidebar sections — follow sectionOrder */}
+        {data.sectionOrder
+          .filter((id): id is string => (SIDEBAR_SECTIONS as Set<string>).has(id))
+          .map((sectionId) => {
+            if (sectionId === 'skills' && skills.length > 0) {
+              return (
+                <SectionHighlight key="skills" sectionId="skills">
+                  <div>
+                    <h2 style={{ fontFamily: headingFont }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{getSectionLabel('skills', data)}</h2>
+                    <div className="flex flex-wrap gap-1">
+                      {skills.map((skill, i) => (
+                        <span key={i} className="text-[7.5pt] text-[#57534e] bg-white px-1.5 py-0.5 rounded border border-[#e7e5e4]">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </SectionHighlight>
-              ))}
-            </div>
-          </SectionHighlight>
-        )}
+              )
+            }
+            if (sectionId === 'education' && data.education.length > 0) {
+              return (
+                <SectionHighlight key="education" sectionId="education">
+                  <div>
+                    <h2 style={{ fontFamily: headingFont }} className="text-[7pt] font-semibold uppercase tracking-[0.2em] text-[#a8a29e] mb-1.5 pb-1 border-b border-[#d6d3d1]">{getSectionLabel('education', data)}</h2>
+                    {data.education.map((edu) => (
+                      <SectionHighlight key={edu.id} sectionId="education" itemId={edu.id}>
+                        <div className="mb-1.5">
+                          <p style={{ fontFamily: headingFont }} className="font-bold text-[8.5pt] leading-tight">{edu.school}</p>
+                          <p className="text-[7.5pt] text-[#57534e]">{edu.degree} · {edu.major}</p>
+                          <p className="text-[7pt] text-[#a8a29e]">{edu.startDate} — {edu.endDate}</p>
+                        </div>
+                      </SectionHighlight>
+                    ))}
+                  </div>
+                </SectionHighlight>
+              )
+            }
+            return null
+          })
+        }
       </div>
 
       {/* Right content */}

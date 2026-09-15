@@ -194,12 +194,8 @@ export async function exportDocx(data: ResumeData, template: TemplateId) {
       }
     }
 
-    // 侧栏章节：
-    // - modern / executive：固定「技能 → 教育」顺序（与模板渲染一致，数据非空即输出）
-    // - minimal：跟随 sectionOrder 中的侧栏模块
-    const sidebarSectionIds = template === 'minimal'
-      ? data.sectionOrder.filter(isSidebarSection)
-      : ['skills', 'education']
+    // 侧栏章节：所有双栏模板均跟随 sectionOrder 中的侧栏模块顺序
+    const sidebarSectionIds = data.sectionOrder.filter(isSidebarSection)
     for (const id of sidebarSectionIds) {
       sidebarParagraphs.push(...makeContentParagraphs(id, sidebarHeader))
     }
