@@ -5,14 +5,14 @@
 //
 // 门槛（两者同时满足才允许分析）：
 // 1. 简历体检分 >= 90
-// 2. 核心信息完整：姓名 / 有效邮箱 / 手机号 / 简介（40 字+）/
+// 2. 核心信息完整：姓名 / 有效邮箱 / 手机号 / 简介（20 字+）/
 //    首段完整经历（公司、职位、起止时间、50 字以上描述）/ 首段完整教育（学校、学历、起止时间）/ 技能 6 个+
 
 import type { ResumeData } from '../types'
 import { checkATS, isValidEmail } from './atsChecker'
 
 export const AI_MIN_SCORE = 90
-export const AI_MIN_SUMMARY_LEN = 40
+export const AI_MIN_SUMMARY_LEN = 20
 export const AI_MIN_SKILLS = 6
 export const AI_MIN_EXP_DESC_LEN = 50
 
